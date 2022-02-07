@@ -1,7 +1,3 @@
-#esto es una prueba
-
-
-
 # coding=utf-8
 #!/usr/bin/env python3
 
@@ -38,20 +34,22 @@ def enviar_mensaje(cs, data):
     """ Esta función envía datos (data) a través del socket cs
         Devuelve el número de bytes enviados.
     """
-    pass
+    return cs.send(data.encode())
 
 
-def recibir_mensaje(cs,data):
+def recibir_mensaje(cs):
     """ Esta función recibe datos a través del socket cs
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
-    pass
+    datos = cs.recv(BUFSIZE)
+    return datos.decode()
+
 
 
 def cerrar_conexion(cs):
     """ Esta función cierra una conexión activa.
     """
-    pass
+    cs.close()
 
 
 def process_cookies(headers,  cs):
@@ -100,6 +98,11 @@ def process_web_request(cs, webroot):
             * Si es por timeout, se cierra el socket tras el período de persistencia.
                 * NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
     """
+    #data = recibir_mensaje(cs)
+    #print(data)
+
+    
+    enviar_mensaje(cs, "hola")
 
 
 def main():
@@ -125,7 +128,8 @@ def main():
         logger.info("Serving files from {}".format(args.webroot))
 
         """ Funcionalidad a realizar
-        * Crea un socket TCP (SOCK_STREAM)
+        * 1. Crea un socket TCP (SOCK_STREAM)
+        
         * Permite reusar la misma dirección previamente vinculada a otro proceso. Debe ir antes de sock.bind
         * Vinculamos el socket a una IP y puerto elegidos
 
@@ -140,6 +144,31 @@ def main():
 
             - Si es el proceso padre cerrar el socket que gestiona el hijo.
         """
+
+        # 1
+
+        s1 = socket.socket(family='AF_INET', type='SOCK_STREAM', proto=0)
+        s1.setsockopt(level='SOL_SOCKET', Optname='SO_REUSEADDR', value=1)
+
+        s1.bind((args[1], args[0]))
+        while(True):
+            if(s1.listen() == -1):
+                print("Error en el socket", file=sys.stderr)
+                sys.exit(1)
+            
+            new_socket, addr_cliente = s1.accept()
+
+            pid = os.fork()
+            if(pid < 0):
+                print("Error en el hijo1", file=sys.stderr)
+            elif(pid == 0):
+                cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
+                process_web_request(new_socket, args[2])
+            else:
+                cerrar_conexion(new_socket)
+
+
+            
     except KeyboardInterrupt:
         True
 
