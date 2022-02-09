@@ -151,13 +151,9 @@ def main():
         s1 =  socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        if(s1.bind(args.host, args.port) < 0):
-            print("Error en bind", file = sys.stderr)
-            sys.exit(1)
+        s1.bind((args.host, args.port))
 
-        if(s1.listen(64) < 0):
-            print("Error en la escucha del socket", file = sys.stderr)
-            sys.exit(1)
+        s1.listen(64)
 
         while(True):
             
