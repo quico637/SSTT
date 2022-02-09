@@ -164,7 +164,7 @@ def main():
                 print("Error en el hijo1", file = sys.stderr)
             elif(pid == 0):
                 cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
-                process_web_request(new_socket, args[2])
+                process_web_request(new_socket, args.webroot)
             else:
                 cerrar_conexion(new_socket)
 
