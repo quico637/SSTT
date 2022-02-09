@@ -147,14 +147,20 @@ def main():
 
         # 1
 
-        s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as s1:
+            pass
+
         s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        s1.bind((args.host, args.port))
+        if(s1.bind((args.host, args.port)) < 0):
+            print("Error en bind", file = sys.stderr)
+            sys.exit(1)
+
+        if(s1.listen(64) < 0):
+            print("Error en la escucha del socket", file = sys.stderr)
+            sys.exit(1)
+
         while(True):
-            if(s1.listen() == -1):
-                print("Error en el socket", file = sys.stderr)
-                sys.exit(1)
             
             new_socket, addr_cliente = s1.accept()
 
