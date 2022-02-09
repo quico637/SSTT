@@ -150,7 +150,7 @@ def main():
         s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        s1.bind((args[1], args[0]))
+        s1.bind((args.host, args.port))
         while(True):
             if(s1.listen() == -1):
                 print("Error en el socket", file=sys.stderr)
