@@ -150,7 +150,7 @@ def main():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as s1:
             pass
 
-        s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, s1)
+        s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
 
         if(s1.bind((args.host, args.port)) < 0):
             print("Error en bind", file = sys.stderr)
