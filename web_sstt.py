@@ -148,12 +148,14 @@ def main():
         # 1
 
         # try except
-        s1 =  socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as s1:
+            pass
         s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         s1.bind((args.host, args.port))
 
         s1.listen(64)
+
 
         while(True):
             
