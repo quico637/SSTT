@@ -149,26 +149,26 @@ def main():
 
         # try except
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as s1:
-            pass
-        s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        s1.bind((args.host, args.port))
-
-        s1.listen(64)
-
-
-        while(True):
             
-            new_socket, addr_cliente = s1.accept()
+            s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-            pid = os.fork()
-            if(pid < 0):
-                print("Error en el hijo1", file = sys.stderr)
-            elif(pid == 0):
-                cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
-                process_web_request(new_socket, args.webroot)
-            else:
-                cerrar_conexion(new_socket)
+            s1.bind((args.host, args.port))
+
+            s1.listen(64)
+
+
+            while(True):
+                
+                new_socket, addr_cliente = s1.accept()
+
+                pid = os.fork()
+                if(pid < 0):
+                    print("Error en el hijo1", file = sys.stderr)
+                elif(pid == 0):
+                    cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
+                    process_web_request(new_socket, args.webroot)
+                else:
+                    cerrar_conexion(new_socket)
 
 
             
