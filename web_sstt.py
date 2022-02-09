@@ -153,14 +153,14 @@ def main():
         s1.bind((args.host, args.port))
         while(True):
             if(s1.listen() == -1):
-                print("Error en el socket", file=sys.stderr)
+                print("Error en el socket", file = sys.stderr)
                 sys.exit(1)
             
             new_socket, addr_cliente = s1.accept()
 
             pid = os.fork()
             if(pid < 0):
-                print("Error en el hijo1", file=sys.stderr)
+                print("Error en el hijo1", file = sys.stderr)
             elif(pid == 0):
                 cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
                 process_web_request(new_socket, args[2])
