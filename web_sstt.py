@@ -147,8 +147,8 @@ def main():
 
         # 1
 
-        s1 = socket.socket(family='AF_INET', type='SOCK_STREAM', proto=0)
-        s1.setsockopt(level='SOL_SOCKET', Optname='SO_REUSEADDR', value=1)
+        s1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         s1.bind((args[1], args[0]))
         while(True):
