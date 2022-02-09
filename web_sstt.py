@@ -158,8 +158,10 @@ def main():
 
 
             while(True):
-                
-                new_socket, addr_cliente = s1.accept()
+                try:
+                    new_socket, addr_cliente = s1.accept()
+                except socket.error:
+                    break
 
                 pid = os.fork()
                 if(pid < 0):
