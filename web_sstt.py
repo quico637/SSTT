@@ -106,7 +106,7 @@ def process_web_request(cs, webroot):
 
     while(True):
 
-        rsublist, wsublist, xsublist = socket.select([cs], [], [], TIMEOUT_CONNECTION)
+        rsublist, wsublist, xsublist = cs.select([cs], [], [], TIMEOUT_CONNECTION)
         if(len(rsublist) == 0):     # en el caso que el select falle
             break
         data = recibir_mensaje(cs)
