@@ -66,6 +66,7 @@ def process_cookies(headers,  cs):
 
 
 def process_web_request(cs, webroot):
+
     """ Procesamiento principal de los mensajes recibidos.
         Típicamente se seguirá un procedimiento similar al siguiente (aunque el alumno puede modificarlo si lo desea)
 
@@ -103,8 +104,16 @@ def process_web_request(cs, webroot):
     #data = recibir_mensaje(cs)
     #print(data)
 
-    
-    enviar_mensaje(cs, "hola")
+    while(True):
+
+        rsublist, wsublist, xsublist = socket.select([cs], [], [], TIMEOUT_CONNECTION)
+        if(len(rsublist) == 0):     # en el caso que el select falle
+            break
+        data = recibir_mensaje(cs)
+        enviar_mensaje(cs, data)
+
+    cerrar_conexion(cs)
+    sys.exit(-1)
 
 
 def main():
@@ -157,7 +166,6 @@ def main():
             s1.bind((args.host, args.port))
 
             s1.listen(64)
-
 
             while(True):
                 try:
