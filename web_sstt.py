@@ -109,8 +109,8 @@ def process_web_request(cs, webroot):
         rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
         if(len(rsublist) == 0):     # en el caso que el select falle
             break
-        data = recibir_mensaje(cs)
-        enviar_mensaje(cs, data)
+        #data = recibir_mensaje(cs)
+        enviar_mensaje(cs, "<html><h1>FELITRONCO</h1></html>")
 
     cerrar_conexion(cs)
     sys.exit(-1)
