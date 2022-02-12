@@ -1,7 +1,8 @@
+#eres un penco que flipas
+
 # coding=utf-8
 #!/usr/bin/env python3
 
-#tonto2
 
 import socket
 import selectors    #https://docs.python.org/3/library/selectors.html
@@ -109,8 +110,8 @@ def process_web_request(cs, webroot):
         rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
         if(len(rsublist) == 0):     # en el caso que el select falle
             break
-        #data = recibir_mensaje(cs)
-        enviar_mensaje(cs, "<html><h1>FELITRONCO</h1></html>")
+        data = recibir_mensaje(cs)
+        enviar_mensaje(cs, data)
 
     cerrar_conexion(cs)
     sys.exit(-1)
