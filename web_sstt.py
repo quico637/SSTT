@@ -26,6 +26,9 @@ MAX_ACCESOS = 10
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
              "html":"text/html", "css":"text/css", "js":"text/js"}
 
+# Lineas de cabecera admitidas por http 1.1
+headers = ["Date", "Server", "Last-Modified", "Etag", "Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "Content-Type"]
+
 # Configuración de logging
 logging.basicConfig(level=logging.INFO,
                     format='[%(asctime)s.%(msecs)03d] [%(levelname)-7s] %(message)s',
@@ -79,6 +82,8 @@ def process_web_request(cs, webroot):
             * Si no es por timeout y hay datos en el socket cs.
                 * Leer los datos con recv.
                 * Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
+
+
                     * Devuelve una lista con los atributos de las cabeceras.
                     * Comprobar si la versión de HTTP es 1.1
                     * Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
@@ -114,6 +119,8 @@ def process_web_request(cs, webroot):
         respuesta = "HTTP/1.1 200 OK\r\ Date: Sun, 26 Sep 2010 20:09:20 GMT\r\n Server: Apache/2.0.52 (CentOS)\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: 2652\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: text/html; charset=ISO-8859-1\r\n\r\ndata data data data.-."
 
         data = recibir_mensaje(cs)
+        splitted = data.split(sep="\r\n", maxsplit=-1)
+        print(data)
         enviar_mensaje(cs, respuesta)
 
     cerrar_conexion(cs)
