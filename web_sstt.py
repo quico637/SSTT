@@ -127,10 +127,9 @@ def process_web_request(cs, webroot):
         data = recibir_mensaje(cs)
 
         splitted = data.split(sep="\r\n", maxsplit=-1)
-        print(splitted)
-        print(splitted[0])
-        splitted = splitted.pop(0)
 
+        splitted = splitted.pop(0)
+        print(splitted)
         for i in splitted:
             if i == "": 
                 continue
