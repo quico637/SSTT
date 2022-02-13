@@ -23,7 +23,7 @@ TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
 MAX_ACCESOS = 10
 
 #Expresiones regulares
-patron_cabeceras = r'.*'
+patron_cabeceras = r'([A-Z].*): .+'
 er_cabeceras = re.compile(patron_cabeceras)
 
 
