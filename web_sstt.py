@@ -135,6 +135,7 @@ def process_web_request(cs, webroot):
             if i == "": 
                 continue
             if(not er_cabeceras.fullmatch(i)):
+                print("NO SALE: " + i)
                 salir = True
                 break
         if(salir):
