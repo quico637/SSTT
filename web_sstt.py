@@ -128,10 +128,10 @@ def process_web_request(cs, webroot):
 
         splitted = data.split(sep="\r\n", maxsplit=-1)
 
-        splitted = splitted.pop(0)
+        splitted = splitted
         print(splitted)
         for i in splitted:
-            if i == "": 
+            if (i == "") or (i.find("GET") > -1): 
                 continue
             if(not er_cabeceras.fullmatch(i)):
                 print("NO SALE: " + i)
