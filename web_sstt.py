@@ -130,9 +130,10 @@ def process_web_request(cs, webroot):
         print(splitted)
         print(splitted[0])
         splitted = splitted.pop(0)
-        splitted = splitted.remove("")
-        splitted = splitted.remove("")
+
         for i in splitted:
+            if i == "": 
+                continue
             if(not er_cabeceras.fullmatch(i)):
                 salir = True
                 break
