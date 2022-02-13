@@ -4,6 +4,7 @@
 #!/usr/bin/env python3
 
 
+from posixpath import split
 import socket
 import selectors    #https://docs.python.org/3/library/selectors.html
 import select
@@ -129,7 +130,8 @@ def process_web_request(cs, webroot):
         print(splitted)
         print(splitted[0])
         splitted = splitted.pop(0)
-
+        splitted = splitted.remove("")
+        splitted = splitted.remove("")
         for i in splitted:
             if(not er_cabeceras.fullmatch(i)):
                 salir = True
