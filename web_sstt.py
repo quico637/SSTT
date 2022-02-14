@@ -66,8 +66,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
             to_send = cabecera.encode() + buffer
             #enviar_mensaje(cs, to_send)
-            cs.send(to_send)
-            
+            cs.send(to_send)        
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
         enviar_mensaje(cs, cabecera)
@@ -196,7 +195,7 @@ def process_web_request(cs, webroot):
             print("No se ha seguido el protocolo HTTP 1.0")
             break
         print(data)
-        enviar_mensaje(cs, respuesta)
+        #enviar_mensaje(cs, respuesta)
 
     cerrar_conexion(cs)
     sys.exit(-1)
