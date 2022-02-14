@@ -143,7 +143,7 @@ def process_web_request(cs, webroot):
         #if(len(rsublist) == 0):     # en el caso que el select falle
         #    break
 
-        respuesta = "HTTP/1.1 200 OK\r\nDate: Sun, 14 Feb 2022 20:09:20 GMT\r\nServer: Chapuza SSTT\r\Content-Length: "
+        respuesta = "HTTP/1.1 200 OK\r\nDate: " + datetime.today() + "\r\nServer: Chapuza SSTT\r\Content-Length: "
 
 
         data = recibir_mensaje(cs)
