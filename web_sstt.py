@@ -143,7 +143,7 @@ def process_web_request(cs, webroot):
         #if(len(rsublist) == 0):     # en el caso que el select falle
         #    break
 
-        respuesta = "HTTP/1.1 200 OK\r\nDate: Sun, 26 Sep 2010 20:09:20 GMT\r\nServer: Chapuza SSTT\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: "
+        respuesta = "HTTP/1.1 200 OK\r\nDate: Sun, 14 Feb 2022 20:09:20 GMT\r\nServer: Chapuza SSTT\r\Content-Length: "
 
 
         data = recibir_mensaje(cs)
@@ -180,7 +180,7 @@ def process_web_request(cs, webroot):
             #error 404 
             pass
 
-        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: html; charset=ISO-8859-1\r\n\r\n"
+        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type:" + os.path.basename(r_solicitado) + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
         print(respuesta)
         enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
 
