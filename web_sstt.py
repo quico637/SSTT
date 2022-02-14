@@ -58,11 +58,11 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
 
-        f = open(ruta, "rb")
+        f = open(ruta, "r")
         buffer = f.read(tam)
 
 
-        to_send = cabecera + buffer.encode()
+        to_send = cabecera + buffer
         enviar_mensaje(cs, to_send)
 
 
