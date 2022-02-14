@@ -32,9 +32,6 @@ er_cabeceras = re.compile(patron_cabeceras)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
              "html":"text/html", "css":"text/css", "js":"text/js"}
 
-# Lineas de cabecera admitidas por http 1.1
-headers = ["Date", "Server", "Last-Modified", "Etag", "Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "Content-Type"]
-
 # Configuración de logging
 logging.basicConfig(level=logging.INFO,
                     format='[%(asctime)s.%(msecs)03d] [%(levelname)-7s] %(message)s',
@@ -56,6 +53,17 @@ def recibir_mensaje(cs):
     datos = cs.recv(BUFSIZE)
     return datos.decode()
 
+
+def enviar_recurso(ruta, tam, cabecera, cs):
+    if (tam + len(cabecera) <= BUFSIZE):
+        # Enviar normal
+
+        f = open(ruta, "rb")
+        buffer = f.read(tam)
+
+
+        to_send = cabecera + buffer
+        enviar_mensaje(cs, to_send)
 
 
 def cerrar_conexion(cs):
@@ -122,7 +130,8 @@ def process_web_request(cs, webroot):
         if(len(rsublist) == 0):     # en el caso que el select falle
             break
 
-        respuesta = "HTTP/1.1 200 OK\r\ Date: Sun, 26 Sep 2010 20:09:20 GMT\r\n Server: Apache/2.0.52 (CentOS)\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: 2652\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: text/html; charset=ISO-8859-1\r\n\r\ndata data data data... tonto"
+        respuesta = "HTTP/1.1 200 OK\r\ Date: Sun, 26 Sep 2010 20:09:20 GMT\r\n Server: Chapuza SSTT anda hejo\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: "
+
 
         data = recibir_mensaje(cs)
 
@@ -153,7 +162,17 @@ def process_web_request(cs, webroot):
         if(text[2] != "/"):
             recurso = text[2]
 
-        if()
+        r_solicitado = webroot + "/" + recurso
+        if(not os.path.isfile(r_solicitado)):
+            #error 404 
+            pass
+
+        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + " \r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: text/html; charset=ISO-8859-1\r\n\r\n"
+        enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+
+
+        
+        #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
 
 
         if(salir):
