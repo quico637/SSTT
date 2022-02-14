@@ -195,7 +195,7 @@ def process_web_request(cs, webroot):
             break
         print(data)
         cerrar_conexion(cs)
-        sys.exit(-1)
+        sys.exit()
 
 
 def main():
