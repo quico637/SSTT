@@ -68,7 +68,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
         enviar_mensaje(cs, cabecera)
-        with open(ruta, "r") as f:
+        with open(ruta, "rb") as f:
             buffer = 0
             while (buffer != -1):
                 buffer = f.read(BUFSIZE)
