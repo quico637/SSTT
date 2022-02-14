@@ -171,7 +171,7 @@ def process_web_request(cs, webroot):
                 salir = True
                 break
 
-        recurso = "index.html"
+        recurso = "/index.html"
         if(text[1] != "/"):
             recurso = text[1]
 
