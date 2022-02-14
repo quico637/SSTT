@@ -61,7 +61,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
         with open(ruta, "rb") as f:
             buffer = f.read()
-            print("BUFFER: \n" + buffer)
+            print("BUFFER: \n" + str(buffer))
 
 
             to_send = cabecera + buffer
