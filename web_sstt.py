@@ -55,25 +55,26 @@ def recibir_mensaje(cs):
 
 
 def enviar_recurso(ruta, tam, cabecera, cs):
-    '''if (tam + len(cabecera) <= BUFSIZE):
+    
+    if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
 
-        with open(ruta, "r") as f:
+        with open(ruta, "rb") as f:
             buffer = f.read()
             print("BUFFER: \n" + buffer)
 
 
             to_send = cabecera + buffer
-            enviar_mensaje(cs, to_send)
-    '''
-    
-        # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
-    enviar_mensaje(cs, cabecera)
-    with open(ruta, "rb") as f:
-        buffer = 0
-        while (buffer != -1):
-            buffer = f.read(BUFSIZE)
+            #enviar_mensaje(cs, to_send)
             cs.send(buffer)
+    else:
+        # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
+        enviar_mensaje(cs, cabecera)
+        with open(ruta, "rb") as f:
+            buffer = 0
+            while (buffer != -1):
+                buffer = f.read(BUFSIZE)
+                cs.send(buffer)
 
         
 
