@@ -167,7 +167,7 @@ def process_web_request(cs, webroot):
             #error 404 
             pass
 
-        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + " \r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: text/html; charset=ISO-8859-1\r\n\r\n"
+        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + " \r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: html; charset=ISO-8859-1\r\n\r\n"
         enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
 
 
