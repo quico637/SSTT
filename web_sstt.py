@@ -131,12 +131,19 @@ def process_web_request(cs, webroot):
         splitted = splitted
         print(splitted)
         for i in splitted:
-            if (i == "") or (i.find("GET") > -1): 
+            if (i == ""):
+                continue
+            text = i.split(sep=" ", maxsplit=-1)
+            if (i.find("GET") > -1): 
+                if(text[3] != "HTTP/1.1"):
+                    salir = True
+                    break
                 continue
             if(not er_cabeceras.fullmatch(i)):
                 print("NO SALE: " + i)
                 salir = True
                 break
+
         if(salir):
             print("No se ha seguido el protocolo HTTP 1.0")
             break
