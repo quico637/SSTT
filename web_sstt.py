@@ -59,13 +59,14 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
 
-        with open(ruta, "r") as f:
+        with open(ruta, "rb") as f:
             buffer = f.read()
-            print("BUFFER: \n" + buffer)
+            print("BUFFER: \n" + str(buffer))
 
 
             to_send = cabecera + buffer
-            enviar_mensaje(cs, to_send)
+            #enviar_mensaje(cs, to_send)
+            cs.send(to_send)
             
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
