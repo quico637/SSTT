@@ -62,7 +62,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         buffer = f.read(tam)
 
 
-        to_send = cabecera + buffer
+        to_send = cabecera + str(buffer)
         enviar_mensaje(cs, to_send)
 
 
