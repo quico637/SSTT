@@ -175,7 +175,7 @@ def process_web_request(cs, webroot):
         if(text[1] != "/"):
             recurso = text[1]
 
-        r_solicitado = webroot + "/" + recurso
+        r_solicitado = webroot + recurso
         if(not os.path.isfile(r_solicitado)):
             #error 404 
             pass
