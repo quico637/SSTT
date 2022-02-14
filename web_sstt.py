@@ -72,7 +72,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             buffer = 0
             while (buffer != -1):
                 buffer = f.read(BUFSIZE)
-                enviar_mensaje(cs, buffer)
+                cs.send(buffer)
 
         
 
