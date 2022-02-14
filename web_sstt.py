@@ -126,9 +126,9 @@ def process_web_request(cs, webroot):
 
     while(True):
         salir = False
-        rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-        if(len(rsublist) == 0):     # en el caso que el select falle
-            break
+        #rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+        #if(len(rsublist) == 0):     # en el caso que el select falle
+        #    break
 
         respuesta = "HTTP/1.1 200 OK\r\ Date: Sun, 26 Sep 2010 20:09:20 GMT\r\n Server: Chapuza SSTT anda hejo\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: "
 
