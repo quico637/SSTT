@@ -181,7 +181,7 @@ def process_web_request(cs, webroot):
             pass
 
         file_type = os.path.basename(r_solicitado).split(".")[1]
-
+#tonto
         respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type:" + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
         print(respuesta)
         enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
