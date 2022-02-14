@@ -58,11 +58,12 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
 
-        with open(ruta, "rb") as f:
+        with open(ruta, "r") as f:
             buffer = f.read()
+            print("BUFFER: \n" + buffer)
 
 
-            to_send = cabecera + str(buffer)
+            to_send = cabecera + buffer
             enviar_mensaje(cs, to_send)
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
@@ -133,7 +134,7 @@ def process_web_request(cs, webroot):
         #if(len(rsublist) == 0):     # en el caso que el select falle
         #    break
 
-        respuesta = "HTTP/1.1 200 OK\r\ Date: Sun, 26 Sep 2010 20:09:20 GMT\r\n Server: Chapuza SSTT anda hejo\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: "
+        respuesta = "HTTP/1.1 200 OK\r\ Date: Sun, 26 Sep 2010 20:09:20 GMT\r\n Server: Chapuza SSTT\r\nLast-Modified: Tue, 30 Oct 2007 17:00:02 GMT\r\nETag: 17dc6-a5c-bf716880\r\nAccept-Ranges: bytes\r\nContent-Length: "
 
 
         data = recibir_mensaje(cs)
@@ -170,7 +171,7 @@ def process_web_request(cs, webroot):
             #error 404 
             pass
 
-        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + " \r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: html; charset=ISO-8859-1\r\n\r\n"
+        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\nContent-Type: html; charset=ISO-8859-1\r\n\r\n"
         enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
 
 
