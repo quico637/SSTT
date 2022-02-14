@@ -148,7 +148,7 @@ def process_web_request(cs, webroot):
             
             if (i.find("GET") > -1): 
                 text = i.split(sep=" ", maxsplit=-1)
-                if(text[3] != "HTTP/1.1"):
+                if(text[2] != "HTTP/1.1"):
                     salir = True
                     break
                 continue
@@ -159,8 +159,8 @@ def process_web_request(cs, webroot):
                 break
 
         recurso = "index.html"
-        if(text[2] != "/"):
-            recurso = text[2]
+        if(text[1] != "/"):
+            recurso = text[1]
 
         r_solicitado = webroot + "/" + recurso
         if(not os.path.isfile(r_solicitado)):
