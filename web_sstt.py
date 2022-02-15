@@ -184,7 +184,7 @@ def process_web_request(cs, webroot):
         if(not os.path.isfile(r_solicitado)):
             err = "./errors/404.html"
             respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-            enviar_recurso(err, os.stat(r_solicitado).st_size, respuesta, cs)
+            enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
             cerrar_conexion(cs)
             sys.exit()
 
