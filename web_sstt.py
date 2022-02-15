@@ -182,11 +182,13 @@ def process_web_request(cs, webroot):
 
         r_solicitado = webroot + recurso
         if(not os.path.isfile(r_solicitado)):
-            enviar_mensaje(cs, "<html>\n<body>\n<h1>Error 404</h1>\n<h3>El recurso solicitado no esta disponible</h3>\n</body>\n</html>")
-            pass
+            err = "./errores/404.html"
+            respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+            enviar_recurso(err, os.stat(r_solicitado).st_size, respuesta, cs)
+            continue
 
         file_type = os.path.basename(r_solicitado).split(".")[1]
-        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type:" + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
         print(respuesta)
         enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
 
