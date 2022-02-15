@@ -182,7 +182,7 @@ def process_web_request(cs, webroot):
 
         r_solicitado = webroot + recurso
         if(not os.path.isfile(r_solicitado)):
-            err = "./errores/404.html"
+            err = "./errors/404.html"
             respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
             enviar_recurso(err, os.stat(r_solicitado).st_size, respuesta, cs)
             continue
