@@ -181,11 +181,13 @@ def process_web_request(cs, webroot):
             recurso = text[1]
         elif(text[1].find("..") > -1):
             print("Violando un principio de seguridad basica.")
-            err = "./errors/seguridad.html"
-            respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-            enviar_recurso(err,  os.stat(err).st_size, respuesta, cs)
+            er = "./errors/seguridad.html"
+            respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+            enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
             cerrar_conexion(cs)
             sys.exit()
+        else:
+            pass
 
         r_solicitado = webroot + recurso
         if(not os.path.isfile(r_solicitado)):
