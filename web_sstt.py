@@ -171,13 +171,18 @@ def process_web_request(cs, webroot):
                 salir = True
                 break
 
+        if(salir):
+            print("No se ha seguido el protocolo HTTP 1.0")
+            cerrar_conexion(cs)
+            sys.exit()
+
         recurso = "/index.html"
         if(text[1] != "/"):
             recurso = text[1]
 
         r_solicitado = webroot + recurso
         if(not os.path.isfile(r_solicitado)):
-            #error 404 
+            enviar_mensaje(cs, "<html><body><h1>Error 404</h1><h3>El recurso solicitado no esta disponible</h3></body></html>")
             pass
 
         file_type = os.path.basename(r_solicitado).split(".")[1]
@@ -188,11 +193,6 @@ def process_web_request(cs, webroot):
 
         
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
-
-
-        if(salir):
-            print("No se ha seguido el protocolo HTTP 1.0")
-            break
         print(data)
         cerrar_conexion(cs)
         sys.exit()
