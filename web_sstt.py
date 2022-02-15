@@ -182,7 +182,7 @@ def process_web_request(cs, webroot):
 
         r_solicitado = webroot + recurso
         if(not os.path.isfile(r_solicitado)):
-            enviar_mensaje(cs, "<html><body><h1>Error 404</h1><h3>El recurso solicitado no esta disponible</h3></body></html>")
+            enviar_mensaje(cs, "<html>\n<body>\n<h1>Error 404</h1>\n<h3>El recurso solicitado no esta disponible</h3>\n</body>\n</html>")
             pass
 
         file_type = os.path.basename(r_solicitado).split(".")[1]
