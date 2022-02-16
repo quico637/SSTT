@@ -163,9 +163,12 @@ def process_web_request(cs, webroot):
     try:
         while(True):
             salir = False
-            #rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-            #if(len(rsublist) == 0):     # en el caso que el select falle
-            #    break
+            rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+            if(not rsublist):     # en el caso que el select falle
+                print("select.select() ha fallado.")
+                cerrar_conexion(cs)
+                sys.exit()
+                
 
             data = recibir_mensaje(cs)
 
@@ -297,19 +300,17 @@ def main():
                     new_socket, addr_cliente = s1.accept()
                 except socket.error:
                     print("Error: accept del socket")
-                #finally:
-                #    print("Cerrando conexion desde el main")
-                #    cerrar_conexion(new_socket)
+                    cerrar_conexion(new_socket)
                     
 
-                pid = os.fork()
-                if(pid < 0):
-                    print("Error en el hijo1", file = sys.stderr)
-                elif(pid == 0):
-                    cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
-                    process_web_request(new_socket, args.webroot)
-                else:
-                    cerrar_conexion(new_socket)
+                with os.fork() as pid:
+                    if(pid < 0):
+                        print("Error en el hijo1", file = sys.stderr)
+                    elif(pid == 0):
+                        cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
+                        process_web_request(new_socket, args.webroot)
+                    else:
+                        cerrar_conexion(new_socket)
 
 
             
