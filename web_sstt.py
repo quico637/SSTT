@@ -67,8 +67,8 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         print("ha entrado en enviar_recurso() - imagen")
         enviar_mensaje(cs, cabecera)
         with open(ruta, "rb") as f:
-            buffer = 0
-            while (buffer != -1):
+            buffer = "no he leido nada"
+            while (buffer):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
                 #print("tola")
@@ -91,8 +91,8 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         print("ha entrado en enviar_recurso() - largo")
         enviar_mensaje(cs, cabecera)
         with open(ruta, "rb") as f:
-            buffer = 0
-            while (buffer != -1):
+            buffer = "no he leido nada"
+            while (buffer):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
                 #print("tola")
