@@ -64,6 +64,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
     print("ha entrado en enviar_recurso()")
     if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1):
+        print("ha entrado en enviar_recurso() - imagen")
         enviar_mensaje(cs, cabecera)
         with open(ruta, "rb") as f:
             buffer = 0
@@ -75,6 +76,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     
     if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
+        print("ha entrado en enviar_recurso() - normal")
 
         with open(ruta, "r") as f:
             buffer = f.read()
@@ -86,6 +88,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             #cs.send(to_send)        
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
+        print("ha entrado en enviar_recurso() - largo")
         enviar_mensaje(cs, cabecera)
         with open(ruta, "rb") as f:
             buffer = 0
