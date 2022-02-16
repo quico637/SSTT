@@ -62,6 +62,7 @@ def recibir_mensaje(cs):
 
 def enviar_recurso(ruta, tam, cabecera, cs):
 
+    print("ha entrado en enviar_recurso()")
     if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1):
         enviar_mensaje(cs, cabecera)
         with open(ruta, "rb") as f:
