@@ -194,7 +194,7 @@ def process_web_request(cs, webroot):
 
                 recurso = "/index.html"
                 if(text[1] != "/"):
-                    print("Es el barra hejo")
+                    print("NO es el barra hejo")
                     recurso = text[1]
                 elif(text[1].find("..") > -1):
                     print("Violando un principio de seguridad basica.")
@@ -203,8 +203,7 @@ def process_web_request(cs, webroot):
                     enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
-                else:
-                    pass
+
 
                 r_solicitado = webroot + recurso
                 if(not os.path.isfile(r_solicitado)):
