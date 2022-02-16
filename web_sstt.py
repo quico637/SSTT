@@ -225,9 +225,9 @@ def process_web_request(cs, webroot):
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
-                #print(data)
-                #cerrar_conexion(cs)
-                #sys.exit()
+
+                cerrar_conexion(cs)
+                sys.exit()
 
     except Exception:
         print("Han cerrao el socket lo mas probable")
