@@ -55,6 +55,15 @@ def recibir_mensaje(cs):
 
 
 def enviar_recurso(ruta, tam, cabecera, cs):
+
+    if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1):
+        enviar_mensaje(cs, cabecera)
+        with open(ruta, "rb") as f:
+            buffer = 0
+            while (buffer != -1):
+                buffer = f.read(BUFSIZE)
+                cs.send(buffer)
+
     
     if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
@@ -137,73 +146,76 @@ def process_web_request(cs, webroot):
     #data = recibir_mensaje(cs)
     #print(data)
 
-    while(True):
-        salir = False
-        #rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-        #if(len(rsublist) == 0):     # en el caso que el select falle
-        #    break
+    try:
+        while(True):
+            salir = False
+            #rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+            #if(len(rsublist) == 0):     # en el caso que el select falle
+            #    break
 
-        respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\Content-Length: "
+            respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\Content-Length: "
 
 
-        data = recibir_mensaje(cs)
+            data = recibir_mensaje(cs)
 
-        splitted = data.split(sep="\r\n", maxsplit=-1)
+            splitted = data.split(sep="\r\n", maxsplit=-1)
 
-        splitted = splitted
-        print(splitted)
+            splitted = splitted
+            print(splitted)
 
-        # Comprobacion de que esta bien la peticion
-        text = []
-        for i in splitted:
-            if (i == ""):
-                continue
-            
-            if (i.find("GET") > -1): 
-                text = i.split(sep=" ", maxsplit=-1)
-                if(text[2] != "HTTP/1.1"):
+            # Comprobacion de que esta bien la peticion
+            text = []
+            for i in splitted:
+                if (i == ""):
+                    continue
+                
+                if (i.find("GET") > -1): 
+                    text = i.split(sep=" ", maxsplit=-1)
+                    if(text[2] != "HTTP/1.1"):
+                        salir = True
+                        break
+                    continue
+                    
+                if(not er_cabeceras.fullmatch(i)):
+                    print("NO SALE: " + i)
                     salir = True
                     break
-                continue
-                
-            if(not er_cabeceras.fullmatch(i)):
-                print("NO SALE: " + i)
-                salir = True
-                break
 
-        if(salir):
-            print("No se ha seguido el protocolo HTTP 1.0")
-            cerrar_conexion(cs)
-            sys.exit()
+            if(salir):
+                print("No se ha seguido el protocolo HTTP 1.0")
+                cerrar_conexion(cs)
+                sys.exit()
 
-        recurso = "/index.html"
-        if(text[1] != "/"):
-            recurso = text[1]
-        elif(text[1].find("..") > -1):
-            print("Violando un principio de seguridad basica.")
-            er = "./errors/seguridad.html"
-            respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-            enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
-            cerrar_conexion(cs)
-            sys.exit()
-        else:
-            pass
+            recurso = "/index.html"
+            if(text[1] != "/"):
+                recurso = text[1]
+            elif(text[1].find("..") > -1):
+                print("Violando un principio de seguridad basica.")
+                er = "./errors/seguridad.html"
+                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
+                cerrar_conexion(cs)
+                sys.exit()
+            else:
+                pass
 
-        r_solicitado = webroot + recurso
-        if(not os.path.isfile(r_solicitado)):
-            err = "./errors/404.html"
-            respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-            enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-            cerrar_conexion(cs)
-            sys.exit()
+            r_solicitado = webroot + recurso
+            if(not os.path.isfile(r_solicitado)):
+                err = "./errors/404.html"
+                respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                cerrar_conexion(cs)
+                sys.exit()
 
-        file_type = os.path.basename(r_solicitado).split(".")[1]
-        respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-        print(respuesta)
-        enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+            file_type = os.path.basename(r_solicitado).split(".")[1]
+            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+            print(respuesta)
+            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+    except Exception:
+        print("Han cerrao el socket lo mas probable")
 
-
-        
+    finally:
+            
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
         print(data)
         cerrar_conexion(cs)
