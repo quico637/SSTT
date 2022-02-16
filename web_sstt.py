@@ -162,7 +162,7 @@ def process_web_request(cs, webroot):
 
             data = recibir_mensaje(cs)
 
-            if(not data):       #data == ""
+            if(data == ""):       #data == ""
                 respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\Content-Length: "
                 splitted = data.split(sep="\r\n", maxsplit=-1)
 
@@ -172,7 +172,7 @@ def process_web_request(cs, webroot):
                 # Comprobacion de que esta bien la peticion
                 text = []
                 for i in splitted:
-                    if (not i):     #i == ""
+                    if (i == ""):     #i == ""
                         continue
                     
                     if (i.find("GET") > -1): 
