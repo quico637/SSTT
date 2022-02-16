@@ -69,6 +69,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             while (buffer != -1):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
+                print("tola")
 
     
     if (tam + len(cabecera) <= BUFSIZE):
@@ -90,6 +91,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             while (buffer != -1):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
+                print("tola")
 
         
 
