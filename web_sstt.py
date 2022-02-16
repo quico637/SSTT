@@ -53,11 +53,12 @@ def recibir_mensaje(cs):
     """ Esta función recibe datos a través del socket cs
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
-    datos = cs.recv(BUFSIZE)
     try:
-        return datos.decode()
+        datos = cs.recv(BUFSIZE)
     except BlockingIOError:
         print("Exception: recibir_mensaje(). Resource temporarily unaviable.")
+    
+    return datos.decode()
 
 
 def enviar_recurso(ruta, tam, cabecera, cs):
@@ -292,9 +293,9 @@ def main():
                     new_socket, addr_cliente = s1.accept()
                 except socket.error:
                     print("Error: accept del socket")
-                #finally:
-                #    print("Cerrando conexion desde el main")
-                #    cerrar_conexion(new_socket)
+                finally:
+                    print("Cerrando conexion desde el main")
+                    cerrar_conexion(new_socket)
                     
 
                 pid = os.fork()
