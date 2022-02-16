@@ -194,6 +194,7 @@ def process_web_request(cs, webroot):
 
                 recurso = "/index.html"
                 if(text[1] != "/"):
+                    print("Es el barra hejo")
                     recurso = text[1]
                 elif(text[1].find("..") > -1):
                     print("Violando un principio de seguridad basica.")
@@ -224,6 +225,7 @@ def process_web_request(cs, webroot):
     finally:
             
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
+        print("Finally:")
         print(data)
         cerrar_conexion(cs)
         sys.exit()
