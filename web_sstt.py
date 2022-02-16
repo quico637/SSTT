@@ -43,7 +43,10 @@ def enviar_mensaje(cs, data):
     """ Esta función envía datos (data) a través del socket cs
         Devuelve el número de bytes enviados.
     """
-    return cs.send(data.encode())
+    try: 
+        return cs.send(data.encode())
+    except BlockingIOError:
+        print("Exception: enviar_mensaje(). Resource temporarily unaviable.")
 
 
 def recibir_mensaje(cs):
@@ -51,7 +54,10 @@ def recibir_mensaje(cs):
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
     datos = cs.recv(BUFSIZE)
-    return datos.decode()
+    try:
+        return datos.decode()
+    except BlockingIOError:
+        print("Exception: recibir_mensaje(). Resource temporarily unaviable.")
 
 
 def enviar_recurso(ruta, tam, cabecera, cs):
@@ -91,6 +97,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 def cerrar_conexion(cs):
     """ Esta función cierra una conexión activa.
     """
+
     cs.close()
 
 
@@ -153,64 +160,64 @@ def process_web_request(cs, webroot):
             #if(len(rsublist) == 0):     # en el caso que el select falle
             #    break
 
-            respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\Content-Length: "
-
-
             data = recibir_mensaje(cs)
 
-            splitted = data.split(sep="\r\n", maxsplit=-1)
+            if(not data):       #data == ""
+                respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\Content-Length: "
+                splitted = data.split(sep="\r\n", maxsplit=-1)
 
-            splitted = splitted
-            print(splitted)
+                splitted = splitted
+                print(splitted)
 
-            # Comprobacion de que esta bien la peticion
-            text = []
-            for i in splitted:
-                if (i == ""):
-                    continue
-                
-                if (i.find("GET") > -1): 
-                    text = i.split(sep=" ", maxsplit=-1)
-                    if(text[2] != "HTTP/1.1"):
+                # Comprobacion de que esta bien la peticion
+                text = []
+                for i in splitted:
+                    if (not i):     #i == ""
+                        continue
+                    
+                    if (i.find("GET") > -1): 
+                        text = i.split(sep=" ", maxsplit=-1)
+                        if(text[2] != "HTTP/1.1"):
+                            salir = True
+                            break
+                        continue
+                        
+                    if(not er_cabeceras.fullmatch(i)):
+                        print("NO SALE: " + i)
                         salir = True
                         break
-                    continue
-                    
-                if(not er_cabeceras.fullmatch(i)):
-                    print("NO SALE: " + i)
-                    salir = True
-                    break
 
-            if(salir):
-                print("No se ha seguido el protocolo HTTP 1.0")
-                cerrar_conexion(cs)
-                sys.exit()
+                if(salir):
+                    print("No se ha seguido el protocolo HTTP 1.0")
+                    cerrar_conexion(cs)
+                    sys.exit()
 
-            recurso = "/index.html"
-            if(text[1] != "/"):
-                recurso = text[1]
-            elif(text[1].find("..") > -1):
-                print("Violando un principio de seguridad basica.")
-                er = "./errors/seguridad.html"
-                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
-                cerrar_conexion(cs)
-                sys.exit()
-            else:
-                pass
+                recurso = "/index.html"
+                if(text[1] != "/"):
+                    recurso = text[1]
+                elif(text[1].find("..") > -1):
+                    print("Violando un principio de seguridad basica.")
+                    er = "./errors/seguridad.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+                else:
+                    pass
 
-            r_solicitado = webroot + recurso
-            if(not os.path.isfile(r_solicitado)):
-                err = "./errors/404.html"
-                respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                cerrar_conexion(cs)
-                sys.exit()
+                r_solicitado = webroot + recurso
+                if(not os.path.isfile(r_solicitado)):
+                    err = "./errors/404.html"
+                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
 
-            file_type = os.path.basename(r_solicitado).split(".")[1]
-            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-            print(respuesta)
-            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+                file_type = os.path.basename(r_solicitado).split(".")[1]
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                print(respuesta)
+                enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+
     except Exception:
         print("Han cerrao el socket lo mas probable")
 
