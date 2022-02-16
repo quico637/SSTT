@@ -293,9 +293,9 @@ def main():
                     new_socket, addr_cliente = s1.accept()
                 except socket.error:
                     print("Error: accept del socket")
-                finally:
-                    print("Cerrando conexion desde el main")
-                    cerrar_conexion(new_socket)
+                #finally:
+                #    print("Cerrando conexion desde el main")
+                #    cerrar_conexion(new_socket)
                     
 
                 pid = os.fork()
