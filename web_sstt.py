@@ -78,14 +78,14 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         # Enviar normal
         print("ha entrado en enviar_recurso() - normal")
 
-        with open(ruta, "rb") as f:
+        with open(ruta, "r") as f:
             buffer = f.read()
             #print("BUFFER: \n" + buffer)
 
 
             to_send = cabecera + buffer
-            #enviar_mensaje(cs, to_send)
-            cs.send(to_send)        
+            enviar_mensaje(cs, to_send)
+            #cs.send(to_send)        
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
         print("ha entrado en enviar_recurso() - largo")
@@ -292,9 +292,9 @@ def main():
                     new_socket, addr_cliente = s1.accept()
                 except socket.error:
                     print("Error: accept del socket")
-                finally:
-                    print("Cerrando conexion desde el main...")
-                    cerrar_conexion(new_socket)
+                #finally:
+                #    print("Cerrando conexion desde el main")
+                #    cerrar_conexion(new_socket)
                     
 
                 pid = os.fork()
