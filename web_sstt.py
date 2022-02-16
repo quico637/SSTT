@@ -225,7 +225,7 @@ def process_web_request(cs, webroot):
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
 
-                print(data)
+                #print(data)
                 cerrar_conexion(cs)
                 sys.exit()
 
@@ -237,8 +237,8 @@ def process_web_request(cs, webroot):
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
         print("Finally:")
         print(data)
-        cerrar_conexion(cs)
-        sys.exit()
+        #cerrar_conexion(cs)
+        #sys.exit()
 
 
 def main():
