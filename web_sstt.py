@@ -163,11 +163,11 @@ def process_web_request(cs, webroot):
     try:
         while(True):
             salir = False
-            rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-            if(not rsublist):     # en el caso que el select falle
-                print("select.select() ha fallado.")
-                cerrar_conexion(cs)
-                sys.exit()
+            #rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+            #if(not rsublist):     # en el caso que el select falle
+            #    print("select.select() ha fallado.")
+            #    cerrar_conexion(cs)
+            #    sys.exit()
                 
 
             data = recibir_mensaje(cs)
