@@ -179,13 +179,16 @@ def process_web_request(cs, webroot):
                 splitted = splitted
                 print(splitted)
 
+
                 # Comprobacion de que esta bien la peticion
                 text = []
+                get = False
                 for i in splitted:
                     if (i == ""):     #i == ""
                         continue
                     
                     if (i.find("GET") > -1): 
+                        get = True
                         text = i.split(sep=" ", maxsplit=-1)
                         if(text[2] != "HTTP/1.1"):
                             salir = True
@@ -201,6 +204,14 @@ def process_web_request(cs, webroot):
                     print("No se ha seguido el protocolo HTTP 1.0")
                     cerrar_conexion(cs)
                     sys.exit()
+                if(not get):
+                    print("Error 405: Method not allowed.")
+                    er = "./errors/405.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
 
                 recurso = "/index.html"
                 if(text[1] != "/"):
@@ -210,7 +221,7 @@ def process_web_request(cs, webroot):
                     print("Violando un principio de seguridad basica.")
                     er = "./errors/seguridad.html"
                     respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(err,  os.stat(er).st_size, respuesta, cs)
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
 
