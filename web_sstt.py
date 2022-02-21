@@ -235,7 +235,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
                 file_type = os.path.basename(r_solicitado).split(".")[1]
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
