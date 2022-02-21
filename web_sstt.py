@@ -27,6 +27,9 @@ MAX_ACCESOS = 10
 patron_cabeceras = r'([A-Z].*): .+'
 er_cabeceras = re.compile(patron_cabeceras)
 
+patron_get = r'GET /.* HTTP/1.1'
+er_get = re.compile(patron_get)
+
 
 # Extensiones admitidas (extension, name in HTTP)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
@@ -193,6 +196,8 @@ def process_web_request(cs, webroot):
                         if(text[2] != "HTTP/1.1"):
                             salir = True
                             break
+                        if(not er_get.fullmatch(i)):
+                            get = False
                         continue
                         
                     if(not er_cabeceras.fullmatch(i)):
