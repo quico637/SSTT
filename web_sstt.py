@@ -193,7 +193,7 @@ def process_web_request(cs, webroot):
                         if (i == ""):     #i == ""
                             continue
                         
-                        #if (i.find("GET") > -1): 
+                        if (i.find("GET") > -1): 
                         #    get = True
                         #    text = i.split(sep=" ", maxsplit=-1)
                         #    if(text[2] != "HTTP/1.1"):
