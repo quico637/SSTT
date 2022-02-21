@@ -179,7 +179,7 @@ def process_web_request(cs, webroot):
                 respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
                 splitted = data.split(sep="\r\n", maxsplit=-1)
 
-                splitted = splitted
+                #splitted = splitted
                 print(splitted)
 
 
@@ -194,14 +194,14 @@ def process_web_request(cs, webroot):
                             continue
                         
                         if (i.find("GET") > -1): 
-                        #    get = True
-                        #    text = i.split(sep=" ", maxsplit=-1)
-                        #    if(text[2] != "HTTP/1.1"):
-                        #        salir = True
-                        #        break
-                            #if(not er_get.fullmatch(i)):
-                            #    get = False
-                            #    break
+                            get = True
+                            text = i.split(sep=" ", maxsplit=-1)
+                            if(text[2] != "HTTP/1.1"):
+                                salir = True
+                                break
+                            if(not er_get.fullmatch(i)):
+                                get = False
+                                break
                             continue
                             
                         if(not er_cabeceras.fullmatch(i)):
