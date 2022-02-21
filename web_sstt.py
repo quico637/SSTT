@@ -156,9 +156,10 @@ def process_web_request(cs, webroot):
             * Si es por timeout, se cierra el socket tras el período de persistencia.
                 * NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
     """
-    #data = recibir_mensaje(cs)
+    data = recibir_mensaje(cs)
+    enviar_mensaje(cs, data)
     #print(data)
-
+'''
     try:
         while(True):
             salir = False
@@ -248,7 +249,7 @@ def process_web_request(cs, webroot):
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
         print(data)
         cerrar_conexion(cs)
-        sys.exit()
+        sys.exit()'''
 
 
 def main():
