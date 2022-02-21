@@ -104,7 +104,6 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 def cerrar_conexion(cs):
     """ Esta función cierra una conexión activa.
     """
-
     cs.close()
 
 
