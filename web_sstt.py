@@ -186,24 +186,30 @@ def process_web_request(cs, webroot):
                 # Comprobacion de que esta bien la peticion
                 text = []
                 get = False
-                for i in splitted:
-                    if (i == ""):     #i == ""
-                        continue
-                    
-                    if (i.find("GET") > -1): 
-                        get = True
-                        text = i.split(sep=" ", maxsplit=-1)
-                        if(text[2] != "HTTP/1.1"):
+
+                if(er_get.fullmatch(splitted[0])):
+                    get = True
+                    for i in splitted:
+                        if (i == ""):     #i == ""
+                            continue
+                        
+                        #if (i.find("GET") > -1): 
+                        #    get = True
+                        #    text = i.split(sep=" ", maxsplit=-1)
+                        #    if(text[2] != "HTTP/1.1"):
+                        #        salir = True
+                        #        break
+                            #if(not er_get.fullmatch(i)):
+                            #    get = False
+                            #    break
+                            continue
+                            
+                        if(not er_cabeceras.fullmatch(i)):
+                            print("NO SALE: " + i)
                             salir = True
                             break
-                        if(not er_get.fullmatch(i)):
-                            get = False
-                        continue
-                        
-                    if(not er_cabeceras.fullmatch(i)):
-                        print("NO SALE: " + i)
-                        salir = True
-                        break
+                
+
 
                 if(salir):
                     print("No se ha seguido el protocolo HTTP 1.0")
