@@ -185,10 +185,10 @@ def process_web_request(cs, webroot):
 
                 # Comprobacion de que esta bien la peticion
                 text = []
-                get = False
+                #get = False
 
                 if(er_get.fullmatch(splitted[0])):
-                    get = True
+                    #get = True
                     for i in splitted:
                         if (i == ""):     #i == ""
                             continue
@@ -203,23 +203,17 @@ def process_web_request(cs, webroot):
                                 get = False
                                 break
                             continue
-                            
-                        if(not er_cabeceras.fullmatch(i)):
-                            print("NO SALE: " + i)
-                            salir = True
-                            break
-                
-
-
-                if(salir):
-                    print("No se ha seguido el protocolo HTTP 1.0")
-                    cerrar_conexion(cs)
-                    sys.exit()
-                if(not get):
+                else:
                     print("Error 405: Method not allowed.")
                     er = "./errors/405.html"
                     respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+
+                if(salir):
+                    print("No se ha seguido el protocolo HTTP 1.0")
                     cerrar_conexion(cs)
                     sys.exit()
 
