@@ -175,7 +175,7 @@ def process_web_request(cs, webroot):
 
             data = recibir_mensaje(cs)
 
-            if(data):       #data == ""
+            if(data):       #data != ""
                 respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
                 splitted = data.split(sep="\r\n", maxsplit=-1)
 
@@ -240,7 +240,16 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
 
+                #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
                 file_type = os.path.basename(r_solicitado).split(".")[1]
+                if(file_type not in filetypes):
+                    err = "./errors/415.html"
+                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+
                 respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
