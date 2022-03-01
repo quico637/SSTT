@@ -230,6 +230,7 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
 
+                if(recurso == '/'): recurso = "/index.html"
 
                 r_solicitado = webroot + recurso
                 if(not os.path.isfile(r_solicitado)):
