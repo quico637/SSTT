@@ -221,7 +221,7 @@ def process_web_request(cs, webroot):
                 recurso = "/index.html"
                 if(text[1] != "/"):
                     print("NO es el barra hejo")
-                    recurso = text[1]
+                    recurso = text[1].split(sep='?', maxsplit=1)[0]
                 elif(text[1].find("..") > -1):
                     print("Violando un principio de seguridad basica.")
                     er = "./errors/seguridad.html"
