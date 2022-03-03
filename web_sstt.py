@@ -185,10 +185,8 @@ def process_web_request(cs, webroot):
 
                 # Comprobacion de que esta bien la peticion
                 text = ""
-                #get = False
                 res = er_get.fullmatch(splitted[0])
                 if(res):
-                    #get = True
                     text = res.group(2)
                     for i in splitted:
                         if (not i):     #i == ""
@@ -197,21 +195,16 @@ def process_web_request(cs, webroot):
                         if (i.find("GET") > -1):
                             continue
 
-                        #if(not er_cabeceras.fullmatch(splitted[i])):
-                        #    print("ERROR CABECERAS")
-                        #    cerrar_conexion(cs)
-                        #    sys.exit(1)
+                        if(not er_cabeceras.fullmatch(i)):
+                            print("ERROR CABECERAS")
+                            cerrar_conexion(cs)
+                            sys.exit(1)
                         
-                        '''if (i.find("GET") > -1): 
-                            get = True
+                        if (i.find("GET") > -1): 
                             text = i.split(sep=" ", maxsplit=-1)
                             if(text[2] != "HTTP/1.1"):
                                 salir = True
                                 break
-                            if(not er_get.fullmatch(i)):
-                                get = False
-                                break
-                            continue'''
                         
                 else:
                     print("Error 405: Method not allowed.")
@@ -265,9 +258,6 @@ def process_web_request(cs, webroot):
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
-
-                #cerrar_conexion(cs)
-                #sys.exit()
 
     except Exception:
         print("Han cerrao el socket lo mas probable")
