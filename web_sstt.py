@@ -197,10 +197,10 @@ def process_web_request(cs, webroot):
                         if (i.find("GET") > -1):
                             continue
 
-                        if(not er_cabeceras.fullmatch(splitted[i])):
-                            print("ERROR CABECERAS")
-                            cerrar_conexion(cs)
-                            sys.exit(1)
+                        #if(not er_cabeceras.fullmatch(splitted[i])):
+                        #    print("ERROR CABECERAS")
+                        #    cerrar_conexion(cs)
+                        #    sys.exit(1)
                         
                         '''if (i.find("GET") > -1): 
                             get = True
