@@ -184,12 +184,12 @@ def process_web_request(cs, webroot):
 
 
                 # Comprobacion de que esta bien la peticion
-                text = []
+                text = ""
                 #get = False
                 res = er_get.fullmatch(splitted[0])
                 if(res):
                     #get = True
-                    text = res.groups()
+                    text = list(res.groups())
                     for i in splitted:
                         if (not i):     #i == ""
                             continue
