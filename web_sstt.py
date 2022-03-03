@@ -227,7 +227,7 @@ def process_web_request(cs, webroot):
                             cerrar_conexion(cs)
                             sys.exit(1)'''
                                    
-                        headers.append(i)
+                        #headers.append(i)
                         
                 else:
                     print("Error 405: Method not allowed.")
