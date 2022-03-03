@@ -24,11 +24,14 @@ TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
 MAX_ACCESOS = 10
 
 #Expresiones regulares
-patron_cabeceras = r'([A-Z].*): .+'
+patron_cabeceras = r'([A-Z].*): (.+)'
 er_cabeceras = re.compile(patron_cabeceras)
 
 patron_get = r"(GET) (/.*) (HTTP/1.1)"
 er_get = re.compile(patron_get)
+
+patron_cookie = r'(Cookie): (cookie_counter)=(\d+)'
+er_cookie = re.compile(patron_cookie)
 
 
 # Extensiones admitidas (extension, name in HTTP)
@@ -84,9 +87,6 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
         with open(ruta, "r") as f:
             buffer = f.read()
-            #print("BUFFER: \n" + buffer)
-
-
             to_send = cabecera + buffer
             enviar_mensaje(cs, to_send)
             #cs.send(to_send)        
@@ -99,7 +99,6 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             while (buffer):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
-                #print("tola")
 
         
 
@@ -107,10 +106,13 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 def cerrar_conexion(cs):
     """ Esta función cierra una conexión activa.
     """
-    cs.close()
+    try: 
+        cs.close()
+    except socket.error:
+        pass
 
 
-def process_cookies(headers,  cs):
+def process_cookies(headers):
     """ Esta función procesa la cookie cookie_counter
         1. Se analizan las cabeceras en headers para buscar la cabecera Cookie
         2. Una vez encontrada una cabecera Cookie se comprueba si el valor es cookie_counter
@@ -118,7 +120,25 @@ def process_cookies(headers,  cs):
         4. Si se encuentra y tiene el valor MAX_ACCESSOS se devuelve MAX_ACCESOS
         5. Si se encuentra y tiene un valor 1 <= x < MAX_ACCESOS se incrementa en 1 y se devuelve el valor
     """
-    pass
+    cookie = False
+    val = 0
+    for i in headers:
+        if(i.find("Cookie") > -1):
+            cookie = True
+            print("SE HA ENCONTRADO COOKIE")
+            if(i.find("cookie_counter") > -1):
+                print("SE ha encontrado cookie_counter")
+                res = er_cookie.fullmatch(i)
+                val = res.group(3)
+    
+    if(cookie): return 1
+    
+    if(val < MAX_ACCESOS): return val+1
+
+    return MAX_ACCESOS
+
+            
+    return 
 
 
 def process_web_request(cs, webroot):
@@ -185,6 +205,7 @@ def process_web_request(cs, webroot):
 
                 # Comprobacion de que esta bien la peticion
                 text = ""
+                headers = []
                 res = er_get.fullmatch(splitted[0])
                 if(res):
                     text = res.group(2)
@@ -192,19 +213,20 @@ def process_web_request(cs, webroot):
                         if (not i):     #i == ""
                             continue
 
-                        if (i.find("GET") > -1):
-                            continue
-
-                        if(not er_cabeceras.fullmatch(i)):
-                            print("ERROR CABECERAS")
-                            cerrar_conexion(cs)
-                            sys.exit(1)
-                        
                         if (i.find("GET") > -1): 
                             text = i.split(sep=" ", maxsplit=-1)
                             if(text[2] != "HTTP/1.1"):
                                 salir = True
                                 break
+                            continue
+
+                        result = er_cabeceras.fullmatch(i)
+                        if(not result):
+                            print("ERROR CABECERAS")
+                            cerrar_conexion(cs)
+                            sys.exit(1)
+                                   
+                        headers.append(i)
                         
                 else:
                     print("Error 405: Method not allowed.")
@@ -217,6 +239,15 @@ def process_web_request(cs, webroot):
 
                 if(salir):
                     print("No se ha seguido el protocolo HTTP 1.0")
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+                accesos = process_cookies(headers)
+                if (accesos == MAX_ACCESOS):
+                    print("Maximo de accesos.")
+                    er = "./errors/403.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
 
@@ -254,7 +285,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
 
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
