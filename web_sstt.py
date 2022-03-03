@@ -191,7 +191,10 @@ def process_web_request(cs, webroot):
                     #get = True
                     text = res.groups()
                     for i in splitted:
-                        if (not i or i.find("GET")):     #i == ""
+                        if (not i):     #i == ""
+                            continue
+
+                        if (i.find("GET") > -1):
                             continue
 
                         if(not er_cabeceras.fullmatch(splitted[i])):
