@@ -189,7 +189,7 @@ def process_web_request(cs, webroot):
                 res = er_get.fullmatch(splitted[0])
                 if(res):
                     #get = True
-                    text = list(res.groups())
+                    text = res.group(2)
                     for i in splitted:
                         if (not i):     #i == ""
                             continue
@@ -229,10 +229,10 @@ def process_web_request(cs, webroot):
 
 
                 recurso = "/index.html"
-                if(text[1] != "/"):
+                if(text != "/"):
                     print("NO es el barra hejo")
-                    recurso = text[1].split(sep='?', maxsplit=1)[0]
-                elif(text[1].find("..") > -1):
+                    recurso = text.split(sep='?', maxsplit=1)[0]
+                elif(recurso.find("..") > -1):
                     print("Violando un principio de seguridad basica.")
                     er = "./errors/seguridad.html"
                     respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
@@ -241,6 +241,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
                 if(recurso == '/'): recurso = "/index.html"
+                print(recurso)
 
                 r_solicitado = webroot + recurso
                 if(not os.path.isfile(r_solicitado)):
