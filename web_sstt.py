@@ -190,11 +190,16 @@ def process_web_request(cs, webroot):
                 if(res):
                     #get = True
                     text = res.groups()
-                    '''for i in splitted:
-                        if (not i):     #i == ""
+                    for i in splitted:
+                        if (not i or i.find("GET")):     #i == ""
                             continue
+
+                        if(not er_cabeceras.fullmatch(splitted[i])):
+                            print("ERROR CABECERAS")
+                            cerrar_conexion(cs)
+                            sys.exit(1)
                         
-                        if (i.find("GET") > -1): 
+                        '''if (i.find("GET") > -1): 
                             get = True
                             text = i.split(sep=" ", maxsplit=-1)
                             if(text[2] != "HTTP/1.1"):
@@ -203,8 +208,8 @@ def process_web_request(cs, webroot):
                             if(not er_get.fullmatch(i)):
                                 get = False
                                 break
-                            continue
-                        '''
+                            continue'''
+                        
                 else:
                     print("Error 405: Method not allowed.")
                     er = "./errors/405.html"
