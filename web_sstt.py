@@ -27,7 +27,7 @@ MAX_ACCESOS = 10
 patron_cabeceras = r'([A-Z].*): .+'
 er_cabeceras = re.compile(patron_cabeceras)
 
-patron_get = r'GET /.* HTTP/1.1'
+patron_get = r"(GET) (/.*) (HTTP/1.1)"
 er_get = re.compile(patron_get)
 
 
@@ -186,11 +186,12 @@ def process_web_request(cs, webroot):
                 # Comprobacion de que esta bien la peticion
                 text = []
                 #get = False
-
-                if(er_get.fullmatch(splitted[0])):
+                res = er_get.fullmatch(splitted[0])
+                if(res):
                     #get = True
-                    for i in splitted:
-                        if (i == ""):     #i == ""
+                    text = res.groups()
+                    '''for i in splitted:
+                        if (not i):     #i == ""
                             continue
                         
                         if (i.find("GET") > -1): 
@@ -203,6 +204,7 @@ def process_web_request(cs, webroot):
                                 get = False
                                 break
                             continue
+                        '''
                 else:
                     print("Error 405: Method not allowed.")
                     er = "./errors/405.html"
