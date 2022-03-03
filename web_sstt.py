@@ -241,7 +241,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
                 if(recurso == '/'): recurso = "/index.html"
-                print(recurso)
+                print("\n\nRECURSO:" +  recurso)
 
                 r_solicitado = webroot + recurso
                 if(not os.path.isfile(r_solicitado)):
