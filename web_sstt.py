@@ -242,7 +242,7 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
 
-                accesos = process_cookies(headers)
+                #accesos = process_cookies(headers)
                 accesos = 1
                 if (accesos == MAX_ACCESOS):
                     print("Maximo de accesos.")
@@ -286,7 +286,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
 
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
