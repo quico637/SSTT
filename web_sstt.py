@@ -120,6 +120,7 @@ def process_cookies(headers):
         4. Si se encuentra y tiene el valor MAX_ACCESSOS se devuelve MAX_ACCESOS
         5. Si se encuentra y tiene un valor 1 <= x < MAX_ACCESOS se incrementa en 1 y se devuelve el valor
     """
+    '''
     cookie = False
     val = 0
     for i in headers:
@@ -135,10 +136,9 @@ def process_cookies(headers):
     
     if(val < MAX_ACCESOS): return val+1
 
-    return MAX_ACCESOS
+    return MAX_ACCESOS'''
 
-            
-    return 
+        
 
 
 def process_web_request(cs, webroot):
@@ -243,6 +243,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
                 accesos = process_cookies(headers)
+                accesos = 1
                 if (accesos == MAX_ACCESOS):
                     print("Maximo de accesos.")
                     er = "./errors/403.html"
