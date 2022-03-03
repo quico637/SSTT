@@ -220,7 +220,7 @@ def process_web_request(cs, webroot):
                                 salir = True
                                 break
                             continue
-
+                        print("holaaaaaa" + i)
                         result = er_cabeceras.fullmatch(i)
                         if(not result):
                             print("ERROR CABECERAS")
