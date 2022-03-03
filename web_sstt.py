@@ -221,11 +221,11 @@ def process_web_request(cs, webroot):
                                 break
                             continue
                         print("holaaaaaa" + i)
-                        result = er_cabeceras.fullmatch(i)
+                        '''result = er_cabeceras.fullmatch(i)
                         if(not result):
                             print("ERROR CABECERAS")
                             cerrar_conexion(cs)
-                            sys.exit(1)
+                            sys.exit(1)'''
                                    
                         headers.append(i)
                         
