@@ -137,6 +137,7 @@ def process_cookies(headers):
     if(val < MAX_ACCESOS): return val+1
 
     return MAX_ACCESOS'''
+    pass
 
         
 
@@ -244,7 +245,7 @@ def process_web_request(cs, webroot):
 
                 #accesos = process_cookies(headers)
                 accesos = 1
-                if (accesos == MAX_ACCESOS):
+                if (accesos >= MAX_ACCESOS):
                     print("Maximo de accesos.")
                     er = "./errors/403.html"
                     respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
@@ -285,7 +286,7 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
 
-
+                #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
                 respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
