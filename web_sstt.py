@@ -213,13 +213,14 @@ def process_web_request(cs, webroot):
                     for i in splitted:
                         if (not i):     #i == ""
                             continue
-
+                        '''
                         if (i.find("GET") > -1): 
                             text = i.split(sep=" ", maxsplit=-1)
                             if(text[2] != "HTTP/1.1"):
                                 salir = True
                                 break
                             continue
+                        '''
                         print("holaaaaaa" + i)
                         '''result = er_cabeceras.fullmatch(i)
                         if(not result):
