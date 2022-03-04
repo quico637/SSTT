@@ -137,7 +137,7 @@ def process_cookies(headers):
     if(not cookie): 
         return 1
 
-    if((val < MAX_ACCESOS) and cookie): 
+    if(val < MAX_ACCESOS): 
         return val+1
 
 
