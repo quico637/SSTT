@@ -123,6 +123,10 @@ def process_cookies(headers):
     
     cookie = False
     val = -1
+
+    for i in headers:
+        print(i)
+
     for i in headers:
         if(i.find("Cookie") > -1):
 
