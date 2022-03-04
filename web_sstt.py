@@ -135,10 +135,11 @@ def process_cookies(headers):
                 cookie = True
                 print("SE ha encontrado cookie_counter")
                 print(i)
-                val = i.split(sep="=", maxsplit=1)[1]
+                #val = i.split(sep="=", maxsplit=1)[1]
                 #res = er_cookie.fullmatch(i)
                 #val = res.group(3)
-                #val = 
+                #val =
+                val = 2 
                 print("VAL: " + val)
                 break
     
