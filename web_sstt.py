@@ -213,6 +213,9 @@ def process_web_request(cs, webroot):
                     for i in splitted:
                         if (not i):     #i == ""
                             continue
+
+                        if(i.find("GET") > -1):
+                            continue
                         '''
                         if (i.find("GET") > -1): 
                             text = i.split(sep=" ", maxsplit=-1)
@@ -231,18 +234,19 @@ def process_web_request(cs, webroot):
                         #headers.append(i)
                         
                 else:
-                    print("Error 405: Method not allowed.")
-                    er = "./errors/405.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
+                    sol = splitted[0].split(sep=" ", maxsplit=-1)
+                    if(sol[0] != "GET"):
+                        print("Error 405: Method not allowed.")
+                        er = "./errors/405.html"
+                        respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                        enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                        cerrar_conexion(cs)
+                        sys.exit()
 
-
-                if(salir):
-                    print("No se ha seguido el protocolo HTTP 1.0")
-                    cerrar_conexion(cs)
-                    sys.exit()
+                    else:
+                        print("No se ha seguido el protocolo HTTP 1.0")
+                        cerrar_conexion(cs)
+                        sys.exit()
 
                 #accesos = process_cookies(headers)
                 accesos = 1
