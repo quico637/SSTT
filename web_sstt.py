@@ -135,7 +135,7 @@ def process_cookies(headers):
                 cookie = True
                 print("SE ha encontrado cookie_counter")
                 print(i)
-                val = i.split(sep="=", maxsplit=-1)[1]
+                val = i.split(sep="=", maxsplit=1)[1]
                 #res = er_cookie.fullmatch(i)
                 #val = res.group(3)
                 #val = 
@@ -258,6 +258,7 @@ def process_web_request(cs, webroot):
                         sys.exit()
 
                 accesos = process_cookies(headers)
+                print("SALE DE ACCESOS")
                 if (accesos >= MAX_ACCESOS):
                     print("Maximo de accesos.")
                     er = "./errors/403.html"
