@@ -134,7 +134,8 @@ def process_cookies(headers):
             if(i.find("cookie_counter") > -1):
                 cookie = True
                 print("SE ha encontrado cookie_counter")
-                res = er_cookie.fullmatch(i)
+                expresion = i.split(sep=":", maxsplit=-1)[0]
+                res = er_cookie.fullmatch(expresion)
                 val = res.group(3)
                 print("VAL: " + val)
                 break
@@ -237,7 +238,7 @@ def process_web_request(cs, webroot):
                             cerrar_conexion(cs)
                             sys.exit(1)
                                    
-                        headers.append(i.split(sep=":", maxsplit=-1)[0])
+                        headers.append(i)
                         
                 else:
                     sol = splitted[0].split(sep=" ", maxsplit=-1)
