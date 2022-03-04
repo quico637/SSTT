@@ -127,7 +127,7 @@ def process_cookies(headers):
     for i in headers:
         print(i)
 
-    for i in headers:
+    '''for i in headers:
         if(i.find("Cookie") > -1):
 
             print("SE HA ENCONTRADO COOKIE")
@@ -141,7 +141,8 @@ def process_cookies(headers):
                 #val =
                 val = 2 
                 print("VAL: " + val)
-                break
+                break'''
+    
     
     if(not cookie): 
         return 1
