@@ -133,6 +133,7 @@ def process_cookies(headers):
                 res = er_cookie.fullmatch(i)
                 val = res.group(3)
                 print("VAL: " + val)
+                break
     
     if(not cookie): 
         return 1
