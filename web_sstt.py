@@ -120,9 +120,9 @@ def process_cookies(headers):
         4. Si se encuentra y tiene el valor MAX_ACCESSOS se devuelve MAX_ACCESOS
         5. Si se encuentra y tiene un valor 1 <= x < MAX_ACCESOS se incrementa en 1 y se devuelve el valor
     """
-    '''
+    
     cookie = False
-    val = 0
+    val = -1
     for i in headers:
         if(i.find("Cookie") > -1):
             cookie = True
@@ -132,14 +132,13 @@ def process_cookies(headers):
                 res = er_cookie.fullmatch(i)
                 val = res.group(3)
     
-    if(cookie): return 1
+    if(cookie): 
+        return 1
     
-    if(val < MAX_ACCESOS): return val+1
+    if(val < MAX_ACCESOS): 
+        return val+1
 
-    return MAX_ACCESOS'''
-    pass
-
-        
+    return MAX_ACCESOS        
 
 
 def process_web_request(cs, webroot):
@@ -186,7 +185,6 @@ def process_web_request(cs, webroot):
 
     try:
         while(True):
-            salir = False
             rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
             if(not rsublist):     # en el caso que el select falle
                 print("select.select() ha fallado.")
@@ -244,12 +242,11 @@ def process_web_request(cs, webroot):
                         sys.exit()
 
                     else:
-                        print("No se ha seguido el protocolo HTTP 1.0")
+                        print("No se ha seguido el protocolo HTTP 1.1")
                         cerrar_conexion(cs)
                         sys.exit()
 
-                #accesos = process_cookies(headers)
-                accesos = 1
+                accesos = process_cookies(headers)
                 if (accesos >= MAX_ACCESOS):
                     print("Maximo de accesos.")
                     er = "./errors/403.html"
