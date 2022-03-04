@@ -139,7 +139,7 @@ def process_cookies(headers):
                 #res = er_cookie.fullmatch(i)
                 #val = res.group(3)
                 #val =
-                print("VAL: " + val)
+                print("VAL: " + str(val))
                 break
     
     
