@@ -134,6 +134,7 @@ def process_cookies(headers):
             if(i.find("cookie_counter") > -1):
                 cookie = True
                 print("SE ha encontrado cookie_counter")
+                print(i)
                 val = i.split(sep="=", maxsplit=-1)[2]
                 #res = er_cookie.fullmatch(i)
                 #val = res.group(3)
