@@ -132,11 +132,12 @@ def process_cookies(headers):
                 print("SE ha encontrado cookie_counter")
                 res = er_cookie.fullmatch(i)
                 val = res.group(3)
+                print("VAL: " + val)
     
     if(not cookie): 
         return 1
 
-    if(val < MAX_ACCESOS and cookie): 
+    if((val < MAX_ACCESOS) and cookie): 
         return val+1
 
 
