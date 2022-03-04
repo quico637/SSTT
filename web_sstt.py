@@ -237,7 +237,7 @@ def process_web_request(cs, webroot):
                             cerrar_conexion(cs)
                             sys.exit(1)
                                    
-                        headers.append(i)
+                        headers.append(i.split(sep=":", maxsplit=-1)[0])
                         
                 else:
                     sol = splitted[0].split(sep=" ", maxsplit=-1)
