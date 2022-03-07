@@ -242,6 +242,56 @@ def process_web_request(cs, webroot):
                         sys.exit(1)
                                 
                     headers.append(i)
+                
+                accesos = process_cookies(headers)
+                print("SALE DE ACCESOS")
+                if (accesos >= MAX_ACCESOS):
+                    print("Maximo de accesos.")
+                    er = "./errors/403.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+
+                recurso = "/index.html"
+                if(text != "/"):
+                    print("NO es el barra hejo")
+                    print("TEXT: " + text)
+                    recurso = text.split(sep='?', maxsplit=1)[0]
+                elif(recurso.find("..") > -1):
+                    print("Violando un principio de seguridad basica.")
+                    er = "./errors/seguridad.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+                if(recurso == '/'): recurso = "/index.html"
+                print("\n\nRECURSO:" +  recurso)
+
+                r_solicitado = webroot + recurso
+                if(not os.path.isfile(r_solicitado)):
+                    err = "./errors/404.html"
+                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+                #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
+                file_type = os.path.basename(r_solicitado).split(".")[1]
+                if(file_type not in filetypes):
+                    err = "./errors/415.html"
+                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+                #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                print(respuesta)
+                enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+                print("HE LLEGAO AL FINAL")
                     
             else:
                 sol = splitted[0].split(sep=" ", maxsplit=-1)
@@ -277,55 +327,7 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
 
-            accesos = process_cookies(headers)
-            print("SALE DE ACCESOS")
-            if (accesos >= MAX_ACCESOS):
-                print("Maximo de accesos.")
-                er = "./errors/403.html"
-                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                cerrar_conexion(cs)
-                sys.exit()
-
-
-            recurso = "/index.html"
-            if(text != "/"):
-                print("NO es el barra hejo")
-                print("TEXT: " + text)
-                recurso = text.split(sep='?', maxsplit=1)[0]
-            elif(recurso.find("..") > -1):
-                print("Violando un principio de seguridad basica.")
-                er = "./errors/seguridad.html"
-                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                cerrar_conexion(cs)
-                sys.exit()
-
-            if(recurso == '/'): recurso = "/index.html"
-            print("\n\nRECURSO:" +  recurso)
-
-            r_solicitado = webroot + recurso
-            if(not os.path.isfile(r_solicitado)):
-                err = "./errors/404.html"
-                respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                cerrar_conexion(cs)
-                sys.exit()
-
-            #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
-            file_type = os.path.basename(r_solicitado).split(".")[1]
-            if(file_type not in filetypes):
-                err = "./errors/415.html"
-                respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                cerrar_conexion(cs)
-                sys.exit()
-
-            #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
-            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
-            print(respuesta)
-            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
-            print("HE LLEGAO AL FINAL")
+            
 
     '''except Exception:
         print("Han cerrao el socket lo mas probable")
