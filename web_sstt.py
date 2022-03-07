@@ -257,7 +257,8 @@ def process_web_request(cs, webroot):
                     #Hacer tratamiento con POST
                     for i in splitted:
                         print(i)
-                        continue
+                    cerrar_conexion(cs)
+                    sys.exit()
 
                 else:
                     print("No se ha seguido el protocolo HTTP 1.1")
