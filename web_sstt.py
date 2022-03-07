@@ -255,8 +255,20 @@ def process_web_request(cs, webroot):
                 elif (sol[0] == "POST"):
                     pass
                     #Hacer tratamiento con POST
+                    found = False
+                    er = ""
                     for i in splitted:
-                        print(i)
+                        if(i.find("email=") > -1):
+                            found = True
+                            if(i.split(sep="%40")[1] == "um.es"):
+                                er = "./post/verificado.html"
+                        else:
+                            continue
+                    
+                    if(not found):
+                        er = "./post/error.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
 
