@@ -248,7 +248,7 @@ def process_web_request(cs, webroot):
                 if(sol[0] != "GET"):
                     print("Error 405: Method not allowed.")
                     er = "./errors/405.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
