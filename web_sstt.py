@@ -245,14 +245,18 @@ def process_web_request(cs, webroot):
                     
             else:
                 sol = splitted[0].split(sep=" ", maxsplit=-1)
-                if(sol[0] != "GET"):
+                if(sol[0] != "GET" and sol[0] != "POST"):
                     print("Error 405: Method not allowed.")
                     er = "./errors/405.html"
                     respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
-
+                elif (sol[0] == "POST"):
+                    pass
+                    #Hacer tratamiento con POST
+                    for i in splitted:
+                        print(i)
                 else:
                     print("No se ha seguido el protocolo HTTP 1.1")
                     cerrar_conexion(cs)
