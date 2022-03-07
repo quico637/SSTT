@@ -195,126 +195,126 @@ def process_web_request(cs, webroot):
     #enviar_mensaje(cs, data)
     #print(data)
 
-    try:
-        while(True):
-            rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-            if(not rsublist):     # en el caso que el select falle
-                print("select.select() ha fallado.")
+    #try:
+    while(True):
+        rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+        if(not rsublist):     # en el caso que el select falle
+            print("select.select() ha fallado.")
+            cerrar_conexion(cs)
+            sys.exit()
+            
+
+        data = recibir_mensaje(cs)
+
+        if(data):       #data != ""
+            respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
+            splitted = data.split(sep="\r\n", maxsplit=-1)
+
+            #splitted = splitted
+            print(splitted)
+
+
+            # Comprobacion de que esta bien la peticion
+            text = ""
+            headers = []
+            res = er_get.fullmatch(splitted[0])
+            if(res):
+                text = res.group(2)
+                for i in splitted:
+                    if (not i):     #i == ""
+                        continue
+
+                    if(i.find("GET") > -1):
+                        continue
+                    '''
+                    if (i.find("GET") > -1): 
+                        text = i.split(sep=" ", maxsplit=-1)
+                        if(text[2] != "HTTP/1.1"):
+                            salir = True
+                            break
+                        continue
+                    '''
+                    print("holaaaaaa" + i)
+                    result = er_cabeceras.fullmatch(i)
+                    if(not result):
+                        print("ERROR CABECERAS")
+                        cerrar_conexion(cs)
+                        sys.exit(1)
+                                
+                    headers.append(i)
+                    
+            else:
+                sol = splitted[0].split(sep=" ", maxsplit=-1)
+                if(sol[0] != "GET"):
+                    print("Error 405: Method not allowed.")
+                    er = "./errors/405.html"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+                else:
+                    print("No se ha seguido el protocolo HTTP 1.1")
+                    cerrar_conexion(cs)
+                    sys.exit()
+
+            accesos = process_cookies(headers)
+            print("SALE DE ACCESOS")
+            if (accesos >= MAX_ACCESOS):
+                print("Maximo de accesos.")
+                er = "./errors/403.html"
+                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                 cerrar_conexion(cs)
                 sys.exit()
-                
-
-            data = recibir_mensaje(cs)
-
-            if(data):       #data != ""
-                respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
-                splitted = data.split(sep="\r\n", maxsplit=-1)
-
-                #splitted = splitted
-                print(splitted)
 
 
-                # Comprobacion de que esta bien la peticion
-                text = ""
-                headers = []
-                res = er_get.fullmatch(splitted[0])
-                if(res):
-                    text = res.group(2)
-                    for i in splitted:
-                        if (not i):     #i == ""
-                            continue
+            recurso = "/index.html"
+            if(text != "/"):
+                print("NO es el barra hejo")
+                print("TEXT: " + text)
+                recurso = text.split(sep='?', maxsplit=1)[0]
+            elif(recurso.find("..") > -1):
+                print("Violando un principio de seguridad basica.")
+                er = "./errors/seguridad.html"
+                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                cerrar_conexion(cs)
+                sys.exit()
 
-                        if(i.find("GET") > -1):
-                            continue
-                        '''
-                        if (i.find("GET") > -1): 
-                            text = i.split(sep=" ", maxsplit=-1)
-                            if(text[2] != "HTTP/1.1"):
-                                salir = True
-                                break
-                            continue
-                        '''
-                        print("holaaaaaa" + i)
-                        result = er_cabeceras.fullmatch(i)
-                        if(not result):
-                            print("ERROR CABECERAS")
-                            cerrar_conexion(cs)
-                            sys.exit(1)
-                                   
-                        headers.append(i)
-                        
-                else:
-                    sol = splitted[0].split(sep=" ", maxsplit=-1)
-                    if(sol[0] != "GET"):
-                        print("Error 405: Method not allowed.")
-                        er = "./errors/405.html"
-                        respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + TIMEOUT_CONNECTION + ", max= " + MAX_ACCESOS+ "\r\nConnection: Keep-Alive\r\n\r\n"
-                        enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                        cerrar_conexion(cs)
-                        sys.exit()
+            if(recurso == '/'): recurso = "/index.html"
+            print("\n\nRECURSO:" +  recurso)
 
-                    else:
-                        print("No se ha seguido el protocolo HTTP 1.1")
-                        cerrar_conexion(cs)
-                        sys.exit()
+            r_solicitado = webroot + recurso
+            if(not os.path.isfile(r_solicitado)):
+                err = "./errors/404.html"
+                respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                cerrar_conexion(cs)
+                sys.exit()
 
-                accesos = process_cookies(headers)
-                print("SALE DE ACCESOS")
-                if (accesos >= MAX_ACCESOS):
-                    print("Maximo de accesos.")
-                    er = "./errors/403.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
+            #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
+            file_type = os.path.basename(r_solicitado).split(".")[1]
+            if(file_type not in filetypes):
+                err = "./errors/415.html"
+                respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                cerrar_conexion(cs)
+                sys.exit()
 
+            #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
+            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
+            print(respuesta)
+            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+            print("HE LLEGAO AL FINAL")
 
-                recurso = "/index.html"
-                if(text != "/"):
-                    print("NO es el barra hejo")
-                    print("TEXT: " + text)
-                    recurso = text.split(sep='?', maxsplit=1)[0]
-                elif(recurso.find("..") > -1):
-                    print("Violando un principio de seguridad basica.")
-                    er = "./errors/seguridad.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-                if(recurso == '/'): recurso = "/index.html"
-                print("\n\nRECURSO:" +  recurso)
-
-                r_solicitado = webroot + recurso
-                if(not os.path.isfile(r_solicitado)):
-                    err = "./errors/404.html"
-                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-                #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
-                file_type = os.path.basename(r_solicitado).split(".")[1]
-                if(file_type not in filetypes):
-                    err = "./errors/415.html"
-                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-                #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
-                print(respuesta)
-                enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
-                print("HE LLEGAO AL FINAL")
-
-    except Exception:
+    '''except Exception:
         print("Han cerrao el socket lo mas probable")
            
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
         print(data)
         cerrar_conexion(cs)
-        sys.exit()
+        sys.exit()'''
 
 
 def main():
