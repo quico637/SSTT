@@ -248,7 +248,7 @@ def process_web_request(cs, webroot):
                 if (accesos >= MAX_ACCESOS):
                     print("Maximo de accesos.")
                     er = "./errors/403.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
@@ -258,7 +258,7 @@ def process_web_request(cs, webroot):
                 if(text != "/"):
                     print("NO es el barra hejo")
                     print("TEXT: " + text)
-                    recurso = text.split(sep='?', maxsplit=1)[0]
+                
                 elif(recurso.find("..") > -1):
                     print("Violando un principio de seguridad basica.")
                     er = "./errors/seguridad.html"
@@ -267,13 +267,15 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
 
+                recurso = text.split(sep='?', maxsplit=1)[0]
+
                 if(recurso == '/'): recurso = "/index.html"
                 print("\n\nRECURSO:" +  recurso)
 
                 r_solicitado = webroot + recurso
                 if(not os.path.isfile(r_solicitado)):
                     err = "./errors/404.html"
-                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
@@ -282,7 +284,7 @@ def process_web_request(cs, webroot):
                 file_type = os.path.basename(r_solicitado).split(".")[1]
                 if(file_type not in filetypes):
                     err = "./errors/415.html"
-                    respuesta = respuesta + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
@@ -298,7 +300,7 @@ def process_web_request(cs, webroot):
                 if(sol[0] != "GET" and sol[0] != "POST"):
                     print("Error 405: Method not allowed.")
                     er = "./errors/405.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
