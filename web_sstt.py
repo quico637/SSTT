@@ -281,7 +281,8 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
                 #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
-                file_type = os.path.basename(r_solicitado).split(".")[1]
+                file_type = os.path.basename(r_solicitado).split(".")
+                file_type = file_type[len(file_type)-1]
                 print("filetype: " + file_type)
                 if(file_type not in filetypes):
                     err = "./errors/415.html"
