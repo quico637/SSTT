@@ -15,7 +15,9 @@ from datetime import datetime, timedelta # Fechas de los mensajes HTTP
 import time         # Timeout conexión
 import sys          # sys.exit
 import re           # Analizador sintáctico
-import logging      # Para imprimir logs
+import logging
+
+from matplotlib import image      # Para imprimir logs
 
 
 
@@ -71,7 +73,10 @@ def recibir_mensaje(cs):
 def enviar_recurso(ruta, tam, cabecera, cs):
 
     print("ha entrado en enviar_recurso()")
+    imagen = False
     if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1):
+        imagen = True
+    if(imagen):
         print("ha entrado en enviar_recurso() - imagen")
         enviar_mensaje(cs, cabecera)
         with open(ruta, "rb") as f:
@@ -79,31 +84,30 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             while (buffer):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
-                #print("tola")
+                
         
-        return 1
+    if(not image):
+        
+        if (tam + len(cabecera) <= BUFSIZE):
+            # Enviar normal
+            print("ha entrado en enviar_recurso() - normal")
+
+            with open(ruta, "r") as f:
+                buffer = f.read()
+                to_send = cabecera + buffer
+                enviar_mensaje(cs, to_send)
+                #cs.send(to_send)        
+        else:
+            # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
+            print("ha entrado en enviar_recurso() - largo")
+            enviar_mensaje(cs, cabecera)
+            with open(ruta, "rb") as f:
+                buffer = "no he leido nada"
+                while (buffer):
+                    buffer = f.read(BUFSIZE)
+                    cs.send(buffer)
 
     
-    if (tam + len(cabecera) <= BUFSIZE):
-        # Enviar normal
-        print("ha entrado en enviar_recurso() - normal")
-
-        with open(ruta, "r") as f:
-            buffer = f.read()
-            to_send = cabecera + buffer
-            enviar_mensaje(cs, to_send)
-            #cs.send(to_send)        
-    else:
-        # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
-        print("ha entrado en enviar_recurso() - largo")
-        enviar_mensaje(cs, cabecera)
-        with open(ruta, "rb") as f:
-            buffer = "no he leido nada"
-            while (buffer):
-                buffer = f.read(BUFSIZE)
-                cs.send(buffer)
-
-    return 1
 
         
 
