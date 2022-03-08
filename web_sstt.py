@@ -76,18 +76,24 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1):
         imagen = True
     if(imagen):
-        print("ha entrado en enviar_recurso() - imagen")
-        enviar_mensaje(cs, cabecera)
-        with open(ruta, "rb") as f:
-            buffer = "no he leido nada"
-            while (buffer):
-                buffer = f.read(BUFSIZE)
-                cs.send(buffer)
+        if(tam + len(cabecera) > BUFSIZE):
+            print("ha entrado en enviar_recurso() - imagen")
+            enviar_mensaje(cs, cabecera)
+            with open(ruta, "rb") as f:
+                buffer = "no he leido nada"
+                while (buffer):
+                    buffer = f.read(BUFSIZE)
+                    cs.send(buffer)
+        else:
+            print("ha entrado en enviar_recurso() - imagen peq")
+            with open(ruta, "r") as f:
+                buffer = f.read()
+                to_send = cabecera + buffer
+                enviar_mensaje(cs, to_send)
                 
+    else:
         
-    if(not imagen):
-        
-        if (tam + len(cabecera) > BUFSIZE):
+        if (tam + len(cabecera) <= BUFSIZE):
             # Enviar normal
             print("ha entrado en enviar_recurso() - normal")
 
