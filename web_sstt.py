@@ -73,7 +73,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
     print("ha entrado en enviar_recurso()")
     imagen = False
-    if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1):
+    if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1 or ruta.find("ico") > -1):
         imagen = True
     if(imagen):
         if(tam + len(cabecera) > BUFSIZE):
