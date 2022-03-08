@@ -80,6 +80,8 @@ def enviar_recurso(ruta, tam, cabecera, cs):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
                 #print("tola")
+        
+        return 1
 
     
     if (tam + len(cabecera) <= BUFSIZE):
@@ -100,6 +102,8 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             while (buffer):
                 buffer = f.read(BUFSIZE)
                 cs.send(buffer)
+
+    return 1
 
         
 
