@@ -85,7 +85,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
                 cs.send(buffer)
                 
         
-    if(not image):
+    if(not imagen):
         
         if (tam + len(cabecera) <= BUFSIZE):
             # Enviar normal
