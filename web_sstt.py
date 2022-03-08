@@ -282,6 +282,7 @@ def process_web_request(cs, webroot):
 
                 #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
                 file_type = os.path.basename(r_solicitado).split(".")[1]
+                print("filetype: " + file_type)
                 if(file_type not in filetypes):
                     err = "./errors/415.html"
                     respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
