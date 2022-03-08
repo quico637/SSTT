@@ -87,7 +87,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         
     if(not imagen):
         
-        if (tam + len(cabecera) <= BUFSIZE):
+        if (tam + len(cabecera) > BUFSIZE):
             # Enviar normal
             print("ha entrado en enviar_recurso() - normal")
 
