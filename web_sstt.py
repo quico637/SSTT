@@ -17,7 +17,6 @@ import sys          # sys.exit
 import re           # Analizador sintáctico
 import logging
 
-from matplotlib import image      # Para imprimir logs
 
 
 
