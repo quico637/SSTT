@@ -22,6 +22,7 @@ import logging      # Para imprimir logs
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
 TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
 MAX_ACCESOS = 10
+COOKIE_TIMER = 120
 
 #Expresiones regulares
 patron_cabeceras = r'([A-Z].*): (.+)'
@@ -36,7 +37,7 @@ er_cookie = re.compile(patron_cookie)
 
 # Extensiones admitidas (extension, name in HTTP)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
-             "html":"text/html", "css":"text/css", "js":"text/js"}
+             "html":"text/html", "css":"text/css", "js":"text/js", "ico":"image/x-ico"}
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO,
@@ -248,7 +249,7 @@ def process_web_request(cs, webroot):
                 if (accesos >= MAX_ACCESOS):
                     print("Maximo de accesos.")
                     er = "./errors/403.html"
-                    respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
+                    respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
@@ -262,7 +263,7 @@ def process_web_request(cs, webroot):
                 elif(recurso.find("..") > -1):
                     print("Violando un principio de seguridad basica.")
                     er = "./errors/seguridad.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=10, max=100\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
@@ -275,7 +276,7 @@ def process_web_request(cs, webroot):
                 r_solicitado = webroot + recurso
                 if(not os.path.isfile(r_solicitado)):
                     err = "./errors/404.html"
-                    respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
+                    respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
@@ -286,13 +287,13 @@ def process_web_request(cs, webroot):
                 print("filetype: " + file_type)
                 if(file_type not in filetypes):
                     err = "./errors/415.html"
-                    respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
+                    respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
 
                 #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + file_type + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS)+ "\r\nConnection: Keep-Alive\r\n\r\n"
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + ", MaxAge= "+ str(COOKIE_TIMER) + "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
@@ -307,7 +308,6 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit()
                 elif (sol[0] == "POST"):
-                    pass
                     #Hacer tratamiento con POST
                     found = False
                     er = "./post/error.html"
@@ -316,8 +316,7 @@ def process_web_request(cs, webroot):
                             found = True
                             if(i.split(sep="%40")[1] == "um.es"):
                                 er = "./post/verificado.html"
-                        else:
-                            continue
+
                     
                     if(not found):
                         er = "./post/error.html"
