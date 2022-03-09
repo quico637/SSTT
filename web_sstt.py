@@ -225,15 +225,17 @@ def process_web_request(cs, webroot):
         rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
         if(not rsublist):     # en el caso que el select falle
             print("select.select() ha fallado.")
-            break
+            #break
             cerrar_conexion(cs)
-            sys.exit()
+            sys.exit(-1)
             
 
         data = recibir_mensaje(cs)
 
         if(not data):   
             break
+            cerrar_conexion(cs)
+            sys.exit(-1)
     
         respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
         splitted = data.split(sep="\r\n", maxsplit=-1)
@@ -258,9 +260,9 @@ def process_web_request(cs, webroot):
                 result = er_cabeceras.fullmatch(i)
                 if(not result):
                     print("ERROR CABECERAS")
-                    break
+                    #break
                     cerrar_conexion(cs)
-                    sys.exit(1)
+                    sys.exit(-1)
                             
                 headers.append(i)
             
@@ -271,9 +273,9 @@ def process_web_request(cs, webroot):
                 er = "./errors/403.html"
                 respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
-                sys.exit()
+                sys.exit(-1)
 
 
             recurso = "/index.html"
@@ -288,9 +290,9 @@ def process_web_request(cs, webroot):
                 ftype = file_type[len(ftype)-1]
                 respuesta ="HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
-                sys.exit()
+                sys.exit(-1)
 
             recurso = text.split(sep='?', maxsplit=1)[0]
 
@@ -308,9 +310,9 @@ def process_web_request(cs, webroot):
                 file_type = file_type[len(file_type)-1]
                 respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
-                sys.exit()
+                sys.exit(-1)
 
 
             if(file_type not in filetypes):
@@ -319,9 +321,9 @@ def process_web_request(cs, webroot):
                 file_type = file_type[len(file_type)-1]
                 respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
-                sys.exit()
+                sys.exit(-1)
 
             #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
             respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
@@ -338,9 +340,9 @@ def process_web_request(cs, webroot):
                 ftype = file_type[len(ftype)-1]
                 respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
-                sys.exit()
+                sys.exit(-1)
             elif (sol[0] == "POST"):
                 #Hacer tratamiento con POST
                 found = False
@@ -358,9 +360,9 @@ def process_web_request(cs, webroot):
                     ftype = file_type[len(ftype)-1]
                     respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    break
+                    #break
                     cerrar_conexion(cs)
-                    sys_exit()
+                    sys.exit(-1)
                 
                 respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
@@ -373,9 +375,9 @@ def process_web_request(cs, webroot):
                 ftype = file_type[len(ftype)-1]
                 respuesta = "HTTP/1.1 400 Bad Request\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
-                sys.exit()
+                sys.exit(-1)
 
     cerrar_conexion(cs)
     sys.exit(-1)
