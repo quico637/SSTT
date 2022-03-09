@@ -308,7 +308,7 @@ def process_web_request(cs, webroot):
                 file_type = file_type[len(file_type)-1]
                 respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                break
+                #break
                 cerrar_conexion(cs)
                 sys.exit()
 
