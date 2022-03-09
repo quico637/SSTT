@@ -94,9 +94,9 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
         else:
             print("ha entrado en enviar_recurso() - imagen peq")
-            with open(ruta, "r") as f:
+            with open(ruta, "rb") as f:
                 buffer = f.read()
-                to_send = cabecera + buffer
+                to_send = cabecera.encode() + buffer
                 enviar_mensaje(cs, to_send)
                 
     else:
