@@ -4,7 +4,6 @@
 #!/usr/bin/env python3
 
 
-from calendar import c
 from posixpath import split
 import socket
 import selectors    #https://docs.python.org/3/library/selectors.html
@@ -18,7 +17,6 @@ import sys          # sys.exit
 import re           # Analizador sintáctico
 import logging
 
-from cv2 import bilateralFilter
 
 
 # devolver un 1 unidad mas q TIMEOUT
