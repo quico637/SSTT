@@ -89,7 +89,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
                     buffer = f.read(BUFSIZE)
                     if(not buffer):
                         break
-                    cs.send(buffer)
+                    enviar_mensaje(cs, buffer)
 
         else:
             print("ha entrado en enviar_recurso() - imagen peq")
