@@ -78,7 +78,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
     imagen = False
     if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1 or ruta.find("ico") > -1):
         imagen = True
-    if(imagen):
+    '''if(imagen):
         if(tam + len(cabecera) > BUFSIZE):
             print("ha entrado en enviar_recurso() - imagen")
             enviar_mensaje(cs, cabecera.encode())
@@ -99,27 +99,26 @@ def enviar_recurso(ruta, tam, cabecera, cs):
                 #enviar_mensaje(cs, to_send)
                 cs.send(to_send)
                 
-    else:
+    else:'''
         
-        if (tam + len(cabecera) <= BUFSIZE):
-            # Enviar normal
-            print("ha entrado en enviar_recurso() - normal")
+    if (tam + len(cabecera) <= BUFSIZE):
+        # Enviar normal
+        print("ha entrado en enviar_recurso() - normal")
 
-            with open(ruta, "rb") as f:
-                buffer = f.read()
-                to_send = cabecera.encode() + buffer
-                enviar_mensaje(cs, to_send)
-                #cs.send(to_send)        
-        else:
-            # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
-            print("ha entrado en enviar_recurso() - largo")
-            enviar_mensaje(cs, cabecera)
-            with open(ruta, "r") as f:
-                buffer = "no he leido nada"
-                while (buffer):
-                    buffer = f.read(BUFSIZE)
-                    #cs.send(buffer)
-                    enviar_mensaje(cs, buffer)
+        with open(ruta, "rb") as f:
+            buffer = f.read()
+            to_send = cabecera.encode() + buffer
+            enviar_mensaje(cs, to_send)
+            #cs.send(to_send)        
+    else:
+        # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
+        print("ha entrado en enviar_recurso() - largo")
+        enviar_mensaje(cs, cabecera.encode())
+        with open(ruta, "rb") as f:
+            while (buffer):
+                buffer = f.read(BUFSIZE)
+                #cs.send(buffer)
+                enviar_mensaje(cs, buffer)
 
     
 
@@ -249,14 +248,6 @@ def process_web_request(cs, webroot):
 
                     if(i.find("GET") > -1):
                         continue
-                    '''
-                    if (i.find("GET") > -1): 
-                        text = i.split(sep=" ", maxsplit=-1)
-                        if(text[2] != "HTTP/1.1"):
-                            salir = True
-                            break
-                        continue
-                    '''
                     print("holaaaaaa" + i)
                     result = er_cabeceras.fullmatch(i)
                     if(not result):
@@ -351,6 +342,9 @@ def process_web_request(cs, webroot):
                     print("No se ha seguido el protocolo HTTP 1.1")
                     cerrar_conexion(cs)
                     sys.exit()
+
+        cerrar_conexion(cs)
+        sys.exit(-1)
 
             
 
