@@ -355,6 +355,7 @@ def process_web_request(cs, webroot):
 
                 
                 if(not found):
+                    print("No se ha encontrado e-mail - 403 Forbidden")
                     er = "./post/error.html"
                     ftype = os.path.basename(er).split(".")
                     ftype = ftype[len(ftype)-1]
@@ -364,12 +365,12 @@ def process_web_request(cs, webroot):
                     cerrar_conexion(cs)
                     sys.exit(-1)
                 
-                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
 
 
             else:
-                print("No se ha seguido el protocolo HTTP 1.1")
+                print("No se ha seguido el protocolo HTTP 1.1 - 400 Bad Request")
                 er = "./post/error.html"
                 ftype = os.path.basename(er).split(".")
                 ftype = ftype[len(ftype)-1]
