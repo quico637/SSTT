@@ -55,7 +55,7 @@ def enviar_mensaje(cs, data):
         Devuelve el número de bytes enviados.
     """
     try: 
-        return cs.send(data.encode())
+        return cs.send(data)
     except BlockingIOError:
         print("Exception: enviar_mensaje(). Resource temporarily unaviable.")
 
@@ -106,7 +106,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             # Enviar normal
             print("ha entrado en enviar_recurso() - normal")
 
-            with open(ruta, "r") as f:
+            with open(ruta, "rb") as f:
                 buffer = f.read()
                 to_send = cabecera + buffer
                 enviar_mensaje(cs, to_send)
