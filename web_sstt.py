@@ -79,6 +79,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         if(tam + len(cabecera) > BUFSIZE):
             print("ha entrado en enviar_recurso() - imagen")
             enviar_mensaje(cs, cabecera)
+            print("ruta" + str(ruta))
             with open(ruta, "rb") as f:
                 buffer = "no he leido nada"
                 while (buffer):
