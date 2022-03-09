@@ -26,7 +26,7 @@ import logging
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
 TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
 MAX_ACCESOS = 10
-COOKIE_TIMER = 120
+COOKIE_TIMER = 20
 
 #Expresiones regulares
 patron_cabeceras = r'([A-Z].*): (.+)'
@@ -316,7 +316,7 @@ def process_web_request(cs, webroot):
                     sys.exit()
 
                 #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + ", MaxAge= "+ str(COOKIE_TIMER) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ ", Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                 print(respuesta)
                 enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
                 print("HE LLEGAO AL FINAL")
@@ -343,7 +343,7 @@ def process_web_request(cs, webroot):
                     
                     if(not found):
                         er = "./post/error.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     cerrar_conexion(cs)
                     sys.exit()
