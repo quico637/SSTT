@@ -84,7 +84,6 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             enviar_mensaje(cs, cabecera)
             print("ruta" + str(ruta))
             with open(ruta, "rb") as f:
-                buffer = ""
                 while (1):
                     buffer = f.read(BUFSIZE)
                     if(not buffer):
@@ -108,7 +107,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
             with open(ruta, "rb") as f:
                 buffer = f.read()
-                to_send = cabecera + buffer
+                to_send = cabecera.encode() + buffer
                 enviar_mensaje(cs, to_send)
                 #cs.send(to_send)        
         else:
