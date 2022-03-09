@@ -115,9 +115,11 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         print("ha entrado en enviar_recurso() - largo")
         enviar_mensaje(cs, cabecera.encode())
         with open(ruta, "rb") as f:
-            while (buffer):
+            while (1):
                 buffer = f.read(BUFSIZE)
                 #cs.send(buffer)
+                if(not buffer):
+                    break
                 enviar_mensaje(cs, buffer)
 
     
