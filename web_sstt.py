@@ -18,6 +18,9 @@ import re           # Analizador sintáctico
 import logging
 
 
+# devolver un 1 unidad mas q TIMEOUT
+
+
 
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
@@ -80,7 +83,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             print("ha entrado en enviar_recurso() - imagen")
             enviar_mensaje(cs, cabecera)
             print("ruta" + str(ruta))
-            with open(ruta, "rb") as f:
+            with open(ruta, "r") as f:
                 buffer = None
                 while (1):
                     buffer = f.read(BUFSIZE)
