@@ -83,13 +83,14 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             print("ha entrado en enviar_recurso() - imagen")
             enviar_mensaje(cs, cabecera)
             print("ruta" + str(ruta))
-            with open(ruta, "r") as f:
+            with open(ruta, "rb") as f:
                 buffer = ""
                 while (1):
                     buffer = f.read(BUFSIZE)
                     if(not buffer):
                         break
-                    enviar_mensaje(cs, buffer)
+                    #enviar_mensaje(cs, buffer)
+                    cs.send(buffer)
 
         else:
             print("ha entrado en enviar_recurso() - imagen peq")
