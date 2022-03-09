@@ -304,6 +304,8 @@ def process_web_request(cs, webroot):
             print("filetype: " + file_type)
             if(not os.path.isfile(r_solicitado)):
                 err = "./errors/404.html"
+                file_type = os.path.basename(err).split(".")
+                file_type = file_type[len(file_type)-1]
                 respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
                 break
@@ -313,6 +315,8 @@ def process_web_request(cs, webroot):
 
             if(file_type not in filetypes):
                 err = "./errors/415.html"
+                file_type = os.path.basename(err).split(".")
+                file_type = file_type[len(file_type)-1]
                 respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
                 break
