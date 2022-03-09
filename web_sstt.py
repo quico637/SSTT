@@ -287,7 +287,7 @@ def process_web_request(cs, webroot):
                 print("Violando un principio de seguridad basica.")
                 er = "./errors/seguridad.html"
                 ftype = os.path.basename(er).split(".")
-                ftype = file_type[len(ftype)-1]
+                ftype = ftype[len(ftype)-1]
                 respuesta ="HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                 #break
@@ -337,7 +337,7 @@ def process_web_request(cs, webroot):
                 print("Error 405: Method not allowed.")
                 er = "./errors/405.html"
                 ftype = os.path.basename(er).split(".")
-                ftype = file_type[len(ftype)-1]
+                ftype = ftype[len(ftype)-1]
                 respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                 #break
@@ -357,7 +357,7 @@ def process_web_request(cs, webroot):
                 if(not found):
                     er = "./post/error.html"
                     ftype = os.path.basename(er).split(".")
-                    ftype = file_type[len(ftype)-1]
+                    ftype = ftype[len(ftype)-1]
                     respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                     #break
@@ -372,7 +372,7 @@ def process_web_request(cs, webroot):
                 print("No se ha seguido el protocolo HTTP 1.1")
                 er = "./post/error.html"
                 ftype = os.path.basename(er).split(".")
-                ftype = file_type[len(ftype)-1]
+                ftype = ftype[len(ftype)-1]
                 respuesta = "HTTP/1.1 400 Bad Request\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
                 #break
