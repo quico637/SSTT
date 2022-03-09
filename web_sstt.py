@@ -97,7 +97,8 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             with open(ruta, "rb") as f:
                 buffer = f.read()
                 to_send = cabecera.encode() + buffer
-                enviar_mensaje(cs, to_send)
+                #enviar_mensaje(cs, to_send)
+                cs.send(to_send)
                 
     else:
         
