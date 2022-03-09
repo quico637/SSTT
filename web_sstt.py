@@ -38,7 +38,7 @@ er_cookie = re.compile(patron_cookie)
 
 # Extensiones admitidas (extension, name in HTTP)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
-             "html":"text/html", "css":"text/css", "js":"text/js", "ico":"image/x-ico"}
+             "html":"text/html", "css":"text/css", "js":"text/js", "ico":"image/jpg"}
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO,
