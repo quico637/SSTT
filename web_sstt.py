@@ -4,6 +4,7 @@
 #!/usr/bin/env python3
 
 
+from calendar import c
 from posixpath import split
 import socket
 import selectors    #https://docs.python.org/3/library/selectors.html
@@ -16,6 +17,8 @@ import time         # Timeout conexión
 import sys          # sys.exit
 import re           # Analizador sintáctico
 import logging
+
+from cv2 import bilateralFilter
 
 
 # devolver un 1 unidad mas q TIMEOUT
@@ -224,126 +227,153 @@ def process_web_request(cs, webroot):
         rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
         if(not rsublist):     # en el caso que el select falle
             print("select.select() ha fallado.")
+            break
             cerrar_conexion(cs)
             sys.exit()
             
 
         data = recibir_mensaje(cs)
 
-        if(data):       #data != ""
-            respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
-            splitted = data.split(sep="\r\n", maxsplit=-1)
+        if(not data):   
+            break
+    
+        respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
+        splitted = data.split(sep="\r\n", maxsplit=-1)
 
-            #splitted = splitted
-            print(splitted)
+        #splitted = splitted
+        print(splitted)
 
 
-            # Comprobacion de que esta bien la peticion
-            text = ""
-            headers = []
-            res = er_get.fullmatch(splitted[0])
-            if(res):
-                text = res.group(2)
+        # Comprobacion de que esta bien la peticion
+        text = ""
+        headers = []
+        res = er_get.fullmatch(splitted[0])
+        if(res):
+            text = res.group(2)
+            for i in splitted:
+                if (not i):     #i == ""
+                    continue
+
+                if(i.find("GET") > -1):
+                    continue
+                print("holaaaaaa" + i)
+                result = er_cabeceras.fullmatch(i)
+                if(not result):
+                    print("ERROR CABECERAS")
+                    break
+                    cerrar_conexion(cs)
+                    sys.exit(1)
+                            
+                headers.append(i)
+            
+            accesos = process_cookies(headers)
+            print("SALE DE ACCESOS")
+            if (accesos >= MAX_ACCESOS):
+                print("Maximo de accesos.")
+                er = "./errors/403.html"
+                respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                break
+                cerrar_conexion(cs)
+                sys.exit()
+
+
+            recurso = "/index.html"
+            if(text != "/"):
+                print("NO es el barra hejo")
+                print("TEXT: " + text)
+            
+            elif(recurso.find("..") > -1):
+                print("Violando un principio de seguridad basica.")
+                er = "./errors/seguridad.html"
+                ftype = os.path.basename(er).split(".")
+                ftype = file_type[len(ftype)-1]
+                respuesta ="HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                break
+                cerrar_conexion(cs)
+                sys.exit()
+
+            recurso = text.split(sep='?', maxsplit=1)[0]
+
+            if(recurso == '/'): recurso = "/index.html"
+            print("\n\nRECURSO:" +  recurso)
+
+            r_solicitado = webroot + recurso
+
+            file_type = os.path.basename(r_solicitado).split(".")
+            file_type = file_type[len(file_type)-1]
+            print("filetype: " + file_type)
+            if(not os.path.isfile(r_solicitado)):
+                err = "./errors/404.html"
+                respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
+                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                break
+                cerrar_conexion(cs)
+                sys.exit()
+
+
+            if(file_type not in filetypes):
+                err = "./errors/415.html"
+                respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
+                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
+                break
+                cerrar_conexion(cs)
+                sys.exit()
+
+            #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
+            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+            print(respuesta)
+            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+            print("HE LLEGAO AL FINAL")
+                
+        else:
+            sol = splitted[0].split(sep=" ", maxsplit=-1)
+            if(sol[0] != "GET" and sol[0] != "POST"):
+                print("Error 405: Method not allowed.")
+                er = "./errors/405.html"
+                ftype = os.path.basename(er).split(".")
+                ftype = file_type[len(ftype)-1]
+                respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                break
+                cerrar_conexion(cs)
+                sys.exit()
+            elif (sol[0] == "POST"):
+                #Hacer tratamiento con POST
+                found = False
+                er = "./post/error.html"
                 for i in splitted:
-                    if (not i):     #i == ""
-                        continue
+                    if(i.find("email=") > -1):
+                        found = True
+                        if(i.split(sep="%40")[1] == "um.es"):
+                            er = "./post/verificado.html"
 
-                    if(i.find("GET") > -1):
-                        continue
-                    print("holaaaaaa" + i)
-                    result = er_cabeceras.fullmatch(i)
-                    if(not result):
-                        print("ERROR CABECERAS")
-                        cerrar_conexion(cs)
-                        sys.exit(1)
-                                
-                    headers.append(i)
                 
-                accesos = process_cookies(headers)
-                print("SALE DE ACCESOS")
-                if (accesos >= MAX_ACCESOS):
-                    print("Maximo de accesos.")
-                    er = "./errors/403.html"
-                    respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-
-                recurso = "/index.html"
-                if(text != "/"):
-                    print("NO es el barra hejo")
-                    print("TEXT: " + text)
-                
-                elif(recurso.find("..") > -1):
-                    print("Violando un principio de seguridad basica.")
-                    er = "./errors/seguridad.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-                recurso = text.split(sep='?', maxsplit=1)[0]
-
-                if(recurso == '/'): recurso = "/index.html"
-                print("\n\nRECURSO:" +  recurso)
-
-                r_solicitado = webroot + recurso
-                if(not os.path.isfile(r_solicitado)):
-                    err = "./errors/404.html"
-                    respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
-                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-                #cuando estoy enviando un error, tengo que seguir teniendo el conexion keep alive?
-                file_type = os.path.basename(r_solicitado).split(".")
-                file_type = file_type[len(file_type)-1]
-                print("filetype: " + file_type)
-                if(file_type not in filetypes):
-                    err = "./errors/415.html"
-                    respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
-                    enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-
-                #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
-                print(respuesta)
-                enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
-                print("HE LLEGAO AL FINAL")
-                    
-            else:
-                sol = splitted[0].split(sep=" ", maxsplit=-1)
-                if(sol[0] != "GET" and sol[0] != "POST"):
-                    print("Error 405: Method not allowed.")
-                    er = "./errors/405.html"
-                    respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nConnection: close\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    cerrar_conexion(cs)
-                    sys.exit()
-                elif (sol[0] == "POST"):
-                    #Hacer tratamiento con POST
-                    found = False
+                if(not found):
                     er = "./post/error.html"
-                    for i in splitted:
-                        if(i.find("email=") > -1):
-                            found = True
-                            if(i.split(sep="%40")[1] == "um.es"):
-                                er = "./post/verificado.html"
-
-                    
-                    if(not found):
-                        er = "./post/error.html"
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Content-Type: html" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                    ftype = os.path.basename(er).split(".")
+                    ftype = file_type[len(ftype)-1]
+                    respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
                     enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                    break
                     cerrar_conexion(cs)
-                    sys.exit()
+                    sys_exit()
+                
+                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
 
-                else:
-                    print("No se ha seguido el protocolo HTTP 1.1")
-                    cerrar_conexion(cs)
-                    sys.exit()
+
+            else:
+                print("No se ha seguido el protocolo HTTP 1.1")
+                er = "./post/error.html"
+                ftype = os.path.basename(er).split(".")
+                ftype = file_type[len(ftype)-1]
+                respuesta = "HTTP/1.1 400 Bad Request\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                break
+                cerrar_conexion(cs)
+                sys.exit()
 
         cerrar_conexion(cs)
         sys.exit(-1)
@@ -356,7 +386,7 @@ def process_web_request(cs, webroot):
         #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
         print(data)
         cerrar_conexion(cs)
-        sys.exit()'''
+        sys.exit(-1)'''
 
 
 def main():
