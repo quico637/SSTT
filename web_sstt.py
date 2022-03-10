@@ -77,9 +77,9 @@ def enviar_recurso(ruta, tam, cabecera, cs):
 
     print("ha entrado en enviar_recurso()")
     imagen = False
-    if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1 or ruta.find("ico") > -1):
+    '''if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1 or ruta.find("ico") > -1):
         imagen = True
-    '''if(imagen):
+    if(imagen):
         if(tam + len(cabecera) > BUFSIZE):
             print("ha entrado en enviar_recurso() - imagen")
             enviar_mensaje(cs, cabecera.encode())
@@ -154,17 +154,9 @@ def process_cookies(headers):
 
     for i in headers:
         if(i.find("Cookie") > -1):
-
-            print("SE HA ENCONTRADO COOKIE")
             if(i.find("cookie_counter") > -1):
                 cookie = True
-                print("SE ha encontrado cookie_counter")
-                print(i)
                 val = int(i.split(sep="=", maxsplit=-1)[1])
-                #res = er_cookie.fullmatch(i)
-                #val = res.group(3)
-                #val =
-                print("VAL: " + str(val))
                 break
     
     
@@ -175,10 +167,21 @@ def process_cookies(headers):
         return val+1
 
 
-    return MAX_ACCESOS        
+    return MAX_ACCESOS     
+
+def enviar_error(addr_cliente, ruta, msg, motivo, cs):
+    print("Socket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + cs.getsockname())
+    print("Motivo:" + motivo)
+    ftype = os.path.basename(ruta).split(".")
+    ftype = ftype[len(ftype)-1]
+    respuesta = msg + "\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(ruta).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
+    enviar_recurso(ruta,  os.stat(ruta).st_size, respuesta, cs)
+
+    cerrar_conexion(cs)
+    sys.exit(-1)  
 
 
-def process_web_request(cs, webroot):
+def process_web_request(cs, webroot, addr_cliente):
 
     """ Procesamiento principal de los mensajes recibidos.
         Típicamente se seguirá un procedimiento similar al siguiente (aunque el alumno puede modificarlo si lo desea)
@@ -216,16 +219,12 @@ def process_web_request(cs, webroot):
             * Si es por timeout, se cierra el socket tras el período de persistencia.
                 * NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
     """
-    #data = recibir_mensaje(cs)
-    #enviar_mensaje(cs, data)
-    #print(data)
 
     #try:
     while(True):
         rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
         if(not rsublist):     # en el caso que el select falle
-            print("select.select() ha fallado.")
-            #break
+            print("Ha saltado el Timeout.")
             cerrar_conexion(cs)
             sys.exit(-1)
             
@@ -233,71 +232,65 @@ def process_web_request(cs, webroot):
         data = recibir_mensaje(cs)
 
         if(not data):   
-            break
             cerrar_conexion(cs)
             sys.exit(-1)
     
         respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
         splitted = data.split(sep="\r\n", maxsplit=-1)
 
-        #splitted = splitted
-        print(splitted)
-
-
-        # Comprobacion de que esta bien la peticion
+        #print(splitted)
         text = ""
         headers = []
         res = er_get.fullmatch(splitted[0])
+        print("PETICION RECIBIDA: ")
         if(res):
             text = res.group(2)
             for i in splitted:
                 if (not i):     #i == ""
                     continue
-
+                print(i)
                 if(i.find("GET") > -1):
                     continue
-                print("holaaaaaa" + i)
                 result = er_cabeceras.fullmatch(i)
                 if(not result):
                     print("ERROR CABECERAS")
-                    #break
                     cerrar_conexion(cs)
                     sys.exit(-1)
                             
                 headers.append(i)
             
             accesos = process_cookies(headers)
-            print("SALE DE ACCESOS")
             if (accesos >= MAX_ACCESOS):
-                print("Maximo de accesos.")
+                enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
                 er = "./errors/403.html"
                 respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                #break
+                print("Socket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + cs.getsockname())
+                print("Motivo: Maximo de accesos. Error 403 Forbidden")
                 cerrar_conexion(cs)
                 sys.exit(-1)
 
 
             recurso = "/index.html"
-            if(text != "/"):
-                print("NO es el barra hejo")
-                print("TEXT: " + text)
-            
-            elif(recurso.find("..") > -1):
-                print("Violando un principio de seguridad basica.")
+                  
+            if(recurso.find("..") > -1):
+                enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
+                '''print("Socket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + cs.getsockname())
+                print("Motivo: Maximo de accesos. Error 403 Forbidden")
                 er = "./errors/seguridad.html"
                 ftype = os.path.basename(er).split(".")
                 ftype = ftype[len(ftype)-1]
                 respuesta ="HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                #break
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)'''
+                
+
                 cerrar_conexion(cs)
                 sys.exit(-1)
 
+            # Quitamos los parametros de la URL si los hubiera
             recurso = text.split(sep='?', maxsplit=1)[0]
 
             if(recurso == '/'): recurso = "/index.html"
-            print("\n\nRECURSO:" +  recurso)
 
             r_solicitado = webroot + recurso
 
@@ -305,6 +298,7 @@ def process_web_request(cs, webroot):
             file_type = file_type[len(file_type)-1]
             print("filetype: " + file_type)
             if(not os.path.isfile(r_solicitado)):
+                enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
                 err = "./errors/404.html"
                 file_type = os.path.basename(err).split(".")
                 file_type = file_type[len(file_type)-1]
@@ -316,6 +310,7 @@ def process_web_request(cs, webroot):
 
 
             if(file_type not in filetypes):
+                enviar_error(addr_cliente, "./errors/415.html", "HTTP/1.1 415 Unsopported Media Type" , "Tipo de archivo no permitido.", cs)
                 err = "./errors/415.html"
                 file_type = os.path.basename(err).split(".")
                 file_type = file_type[len(file_type)-1]
@@ -334,6 +329,7 @@ def process_web_request(cs, webroot):
         else:
             sol = splitted[0].split(sep=" ", maxsplit=-1)
             if(sol[0] != "GET" and sol[0] != "POST"):
+                enviar_error(addr_cliente, "./errors/405.html",  "HTTP/1.1 405 Method not allowed" , "Metodo no soportado.", cs)
                 print("Error 405: Method not allowed.")
                 er = "./errors/405.html"
                 ftype = os.path.basename(er).split(".")
@@ -346,7 +342,7 @@ def process_web_request(cs, webroot):
             elif (sol[0] == "POST"):
                 #Hacer tratamiento con POST
                 found = False
-                er = "./post/error.html"
+                er = ""
                 for i in splitted:
                     if(i.find("email=") > -1):
                         found = True
@@ -355,7 +351,8 @@ def process_web_request(cs, webroot):
 
                 
                 if(not found):
-                    print("No se ha encontrado e-mail - 403 Forbidden")
+                    #print("No se ha encontrado e-mail - 403 Forbidden")
+                    enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 403 Forbidden" , "No se ha enviado el formulario correctamente.", cs)
                     er = "./post/error.html"
                     ftype = os.path.basename(er).split(".")
                     ftype = ftype[len(ftype)-1]
@@ -368,9 +365,9 @@ def process_web_request(cs, webroot):
                 respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
 
-
             else:
-                print("No se ha seguido el protocolo HTTP 1.1 - 400 Bad Request")
+                #print("No se ha seguido el protocolo HTTP 1.1 - 400 Bad Request")
+                enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
                 er = "./post/error.html"
                 ftype = os.path.basename(er).split(".")
                 ftype = ftype[len(ftype)-1]
@@ -379,11 +376,7 @@ def process_web_request(cs, webroot):
                 #break
                 cerrar_conexion(cs)
                 sys.exit(-1)
-
-    cerrar_conexion(cs)
-    sys.exit(-1)
-
-            
+          
 
     '''except Exception:
         print("Han cerrao el socket lo mas probable")
@@ -449,7 +442,7 @@ def main():
                 try:
                     new_socket, addr_cliente = s1.accept()
                 except socket.error:
-                    print("Error: accept del socket")
+                    print("Error: accept del socket", file = sys.stderr)
                     cerrar_conexion(new_socket)
                     
 
@@ -458,7 +451,7 @@ def main():
                     print("Error en el hijo1", file = sys.stderr)
                 elif(pid == 0):
                     cerrar_conexion(s1)      #porque son descriptores de ficheros y no van a usar los sockets correspondientes. s1 lo usa el padre para las peticiones, y el otro lo usa el hijo para crear sus hilicos
-                    process_web_request(new_socket, args.webroot)
+                    process_web_request(new_socket, args.webroot, addr_cliente)
                 else:                       # proceso padre
                     cerrar_conexion(new_socket)
 
