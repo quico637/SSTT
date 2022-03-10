@@ -139,7 +139,7 @@ def process_cookies(headers):
     return MAX_ACCESOS     
 
 def enviar_error(addr_cliente, ruta, msg, motivo, cs):
-    print("\n\nSocket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + str(cs.getsockname()))
+    print("\n\nSocket cerrado. Cliente: " + str(addr_cliente))
     print("Motivo: " + motivo)
     ftype = os.path.basename(ruta).split(".")
     ftype = ftype[len(ftype)-1]
@@ -212,6 +212,7 @@ def process_web_request(cs, webroot, addr_cliente):
         text = ""
         headers = []
         res = er_get.fullmatch(splitted[0])
+        print("Cliente: " + str(addr_cliente))
         print("\n\nPETICION RECIBIDA: ")
         if(res):
             text = res.group(2)
