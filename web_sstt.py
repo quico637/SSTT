@@ -205,7 +205,7 @@ def process_web_request(cs, webroot, addr_cliente):
             elif (sol[0] == "POST"):
                 #Hacer tratamiento con POST
                 found = False
-                er = ""
+                er = "./post/error.html"
                 for i in splitted:
                     if(i.find("email=") > -1):
                         found = True
