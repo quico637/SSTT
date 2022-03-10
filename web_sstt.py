@@ -52,23 +52,17 @@ logger = logging.getLogger()
 
 
 def enviar_mensaje(cs, data):
-    """ Esta función envía datos (data) a través del socket cs
-        Devuelve el número de bytes enviados.
-    """
     try: 
         return cs.send(data)
     except BlockingIOError:
-        print("Exception: enviar_mensaje(). Resource temporarily unaviable.")
+        print("Exception: enviar_mensaje(). Resource temporarily unaviable.", file=sys.stderr)
 
 
 def recibir_mensaje(cs):
-    """ Esta función recibe datos a través del socket cs
-        Leemos la información que nos llega. recv() devuelve un string con los datos.
-    """
     try:
         datos = cs.recv(BUFSIZE)
     except BlockingIOError:
-        print("Exception: recibir_mensaje(). Resource temporarily unaviable.")
+        print("Exception: recibir_mensaje(). Resource temporarily unaviable.", file=sys.stderr)
     
     return datos.decode()
 
@@ -80,8 +74,7 @@ def enviar_recurso(ruta, tam, cabecera, cs):
         with open(ruta, "rb") as f:
             buffer = f.read()
             to_send = cabecera.encode() + buffer
-            enviar_mensaje(cs, to_send)
-            #cs.send(to_send)        
+            enviar_mensaje(cs, to_send)   
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
         enviar_mensaje(cs, cabecera.encode())
@@ -92,34 +85,17 @@ def enviar_recurso(ruta, tam, cabecera, cs):
                     break
                 enviar_mensaje(cs, buffer)
 
-    
-
-        
-
 
 def cerrar_conexion(cs):
-    """ Esta función cierra una conexión activa.
-    """
     try: 
         cs.close()
     except socket.error:
         pass
 
 
-def process_cookies(headers):
-    """ Esta función procesa la cookie cookie_counter
-        1. Se analizan las cabeceras en headers para buscar la cabecera Cookie
-        2. Una vez encontrada una cabecera Cookie se comprueba si el valor es cookie_counter
-        3. Si no se encuentra cookie_counter , se devuelve 1
-        4. Si se encuentra y tiene el valor MAX_ACCESSOS se devuelve MAX_ACCESOS
-        5. Si se encuentra y tiene un valor 1 <= x < MAX_ACCESOS se incrementa en 1 y se devuelve el valor
-    """
-    
+def process_cookies(headers):   
     cookie = False
     val = -1
-
-    for i in headers:
-        print(i)
 
     for i in headers:
         if(i.find("Cookie") > -1):
@@ -134,13 +110,12 @@ def process_cookies(headers):
 
     if(val < MAX_ACCESOS): 
         return val+1
-
-
+        
     return MAX_ACCESOS     
 
 def enviar_error(addr_cliente, ruta, msg, motivo, cs):
-    print("\n\nSocket cerrado. Cliente: " + str(addr_cliente))
-    print("Motivo: " + motivo)
+    print("\n\nSocket cerrado. Cliente: " + str(addr_cliente), file=sys.stderr)
+    print("Motivo: " + motivo, file=sys.stderr)
     ftype = os.path.basename(ruta).split(".")
     ftype = ftype[len(ftype)-1]
     respuesta = msg + "\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(ruta).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
@@ -152,154 +127,107 @@ def enviar_error(addr_cliente, ruta, msg, motivo, cs):
 
 
 def process_web_request(cs, webroot, addr_cliente):
-
-    """ Procesamiento principal de los mensajes recibidos.
-        Típicamente se seguirá un procedimiento similar al siguiente (aunque el alumno puede modificarlo si lo desea)
-
-        * Bucle para esperar hasta que lleguen datos en la red a través del socket cs con select()
-
-            * Se comprueba si hay que cerrar la conexión por exceder TIMEOUT_CONNECTION segundos
-              sin recibir ningún mensaje o hay datos. Se utiliza select.select
-
-            * Si no es por timeout y hay datos en el socket cs.
-                * Leer los datos con recv.
-                * Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
-
-
-                    * Devuelve una lista con los atributos de las cabeceras.
-                    * Comprobar si la versión de HTTP es 1.1
-                    * Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
-                    * Leer URL y eliminar parámetros si los hubiera
-                    * Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
-                    * Construir la ruta absoluta del recurso (webroot + recurso solicitado)
-                    * Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
-                    * Analizar las cabeceras. Imprimir cada cabecera y su valor. Si la cabecera es Cookie comprobar
-                      el valor de cookie_counter para ver si ha llegado a MAX_ACCESOS.
-                      Si se ha llegado a MAX_ACCESOS devolver un Error "403 Forbidden"
-                    * Obtener el tamaño del recurso en bytes.
-                    * Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
-                    * Preparar respuesta con código 200. Construir una respuesta que incluya: la línea de respuesta y
-                      las cabeceras Date, Server, Connection, Set-Cookie (para la cookie cookie_counter),
-                      Content-Length y Content-Type.
-                    * Leer y enviar el contenido del fichero a retornar en el cuerpo de la respuesta.
-                    * Se abre el fichero en modo lectura y modo binario
-                        * Se lee el fichero en bloques de BUFSIZE bytes (8KB)
-                        * Cuando ya no hay más información para leer, se corta el bucle
-
-            * Si es por timeout, se cierra el socket tras el período de persistencia.
-                * NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
-    """
-
-    #try:
-    while(True):
-        rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-        if(not rsublist):     # en el caso que el select falle
-            print("\n\nHa saltado el Timeout.")
-            cerrar_conexion(cs)
-            sys.exit(-1)
-            
-
-        data = recibir_mensaje(cs)
-
-        if(not data):   
-            cerrar_conexion(cs)
-            sys.exit(-1)
-    
-        respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
-        splitted = data.split(sep="\r\n", maxsplit=-1)
-
-        #print(splitted)
-        text = ""
-        headers = []
-        res = er_get.fullmatch(splitted[0])
-        print("Cliente: " + str(addr_cliente))
-        print("\n\nPETICION RECIBIDA: ")
-        if(res):
-            text = res.group(2)
-            for i in splitted:
-                if (not i):     #i == ""
-                    continue
-                print(i)
-                if(i.find("GET") > -1):
-                    continue
-                result = er_cabeceras.fullmatch(i)
-                if(not result):
-                    print("\n\nERROR CABECERAS.")
-                    cerrar_conexion(cs)
-                    sys.exit(-1)
-                            
-                headers.append(i)
-            
-            accesos = process_cookies(headers)
-            if (accesos >= MAX_ACCESOS):
-                enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
-
-            recurso = "/index.html"
-                  
-            if(recurso.find("..") > -1):
-                enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
-
-            # Quitamos los parametros de la URL si los hubiera
-            recurso = text.split(sep='?', maxsplit=1)[0]
-
-            if(recurso == '/'): recurso = "/index.html"
-
-            r_solicitado = webroot + recurso
-
-            file_type = os.path.basename(r_solicitado).split(".")
-            file_type = file_type[len(file_type)-1]
-            if(not os.path.isfile(r_solicitado)):
-                enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
-
-
-            if(file_type not in filetypes):
-                enviar_error(addr_cliente, "./errors/415.html", "HTTP/1.1 415 Unsopported Media Type" , "Tipo de archivo no permitido.", cs)
-
-            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
-            print("RESPUESTA:")
-            print(respuesta)
-            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+    try:
+        while(True):
+            rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+            if(not rsublist):     # en el caso que el select falle
+                print("\n\nHa saltado el Timeout.", file=sys.stderr)
+                cerrar_conexion(cs)
+                sys.exit(-1)
                 
-        else:
-            sol = splitted[0].split(sep=" ", maxsplit=-1)
-            if(sol[0] != "GET" and sol[0] != "POST"):
-                enviar_error(addr_cliente, "./errors/405.html",  "HTTP/1.1 405 Method not allowed" , "Metodo no soportado.", cs)
-            elif (sol[0] == "POST"):
-                #Hacer tratamiento con POST
-                found = False
-                er = ""
+
+            data = recibir_mensaje(cs)
+
+            if(not data):   
+                cerrar_conexion(cs)
+                sys.exit(-1)
+        
+            respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
+            splitted = data.split(sep="\r\n", maxsplit=-1)
+
+            text = ""
+            headers = []
+            res = er_get.fullmatch(splitted[0])
+            print("Cliente: " + str(addr_cliente))
+            print("\n\nPETICION RECIBIDA: ")
+            if(res):
+                text = res.group(2)
                 for i in splitted:
-                    if(i.find("email=") > -1):
-                        found = True
-                        if(i.split(sep="%40")[1] == "um.es"):
-                            er = "./post/verificado.html"
-
+                    if (not i):     #i == ""
+                        continue
+                    print(i)
+                    if(i.find("GET") > -1):
+                        continue
+                    result = er_cabeceras.fullmatch(i)
+                    if(not result):
+                        print("\n\nERROR CABECERAS.", file=sys.stderr)
+                        cerrar_conexion(cs)
+                        sys.exit(-1)
+                                
+                    headers.append(i)
                 
-                if(not found):
-                    #print("No se ha encontrado e-mail - 403 Forbidden")
-                    enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 403 Forbidden" , "No se ha enviado el formulario correctamente.", cs)
-                
-                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+                accesos = process_cookies(headers)
+                if (accesos >= MAX_ACCESOS):
+                    enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
 
+                recurso = "/index.html"
+                    
+                if(recurso.find("..") > -1):
+                    enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
+
+                # Quitamos los parametros de la URL si los hubiera
+                recurso = text.split(sep='?', maxsplit=1)[0]
+
+                if(recurso == '/'): recurso = "/index.html"
+
+                r_solicitado = webroot + recurso
+
+                file_type = os.path.basename(r_solicitado).split(".")
+                file_type = file_type[len(file_type)-1]
+                if(not os.path.isfile(r_solicitado)):
+                    enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
+
+
+                if(file_type not in filetypes):
+                    enviar_error(addr_cliente, "./errors/415.html", "HTTP/1.1 415 Unsopported Media Type" , "Tipo de archivo no permitido.", cs)
+
+                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                print("\n\nRESPUESTA:")
+                print(respuesta)
+                enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+                    
             else:
-                #print("No se ha seguido el protocolo HTTP 1.1 - 400 Bad Request")
-                enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
-          
+                sol = splitted[0].split(sep=" ", maxsplit=-1)
+                if(sol[0] != "GET" and sol[0] != "POST"):
+                    enviar_error(addr_cliente, "./errors/405.html",  "HTTP/1.1 405 Method not allowed" , "Metodo no soportado.", cs)
+                elif (sol[0] == "POST"):
+                    #Hacer tratamiento con POST
+                    found = False
+                    er = ""
+                    for i in splitted:
+                        if(i.find("email=") > -1):
+                            found = True
+                            if(i.split(sep="%40")[1] == "um.es"):
+                                er = "./post/verificado.html"
 
-    '''except Exception:
-        print("Han cerrao el socket lo mas probable")
-           
-        #cuando encontramos un error tenemos que cerrar el socket? las 2 opciones son validas. Con un close tienes que hacer un exit Cuando cierro, mandar un conection close y si lo mantienes pues le mandas un conection keep alive
-        print(data)
+                    
+                    if(not found):
+                        enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 403 Forbidden" , "No se ha enviado el formulario correctamente.", cs)
+                    
+                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+
+                else:
+                    enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
+            
+    except Exception:
+        print("\n\nHa ocurrido un error inesperado.", file=sys.stderr)
+
         cerrar_conexion(cs)
-        sys.exit(-1)'''
+        sys.exit(-1)
 
 
 def main():
-    """ Función principal del servidor
-    """
-
     try:
 
         # Argument parser para obtener la ip y puerto de los parámetros de ejecución del programa. IP por defecto 0.0.0.0
@@ -318,27 +246,7 @@ def main():
 
         logger.info("Serving files from {}".format(args.webroot))
 
-        """ Funcionalidad a realizar
-        * 1. Crea un socket TCP (SOCK_STREAM)
-        
-        * Permite reusar la misma dirección previamente vinculada a otro proceso. Debe ir antes de sock.bind
-        * Vinculamos el socket a una IP y puerto elegidos
-
-        * Escucha conexiones entrantes
-
-        * Bucle infinito para mantener el servidor activo indefinidamente
-            - Aceptamos la conexión
-
-            - Creamos un proceso hijo
-
-            - Si es el proceso hijo se cierra el socket del padre y procesar la petición con process_web_request()
-
-            - Si es el proceso padre cerrar el socket que gestiona el hijo.
-        """
-
-        # 1
-
-        # try except
+        #Con with, se gestiona tambien los try except.
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as s1:
             
             s1.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
