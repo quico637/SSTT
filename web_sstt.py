@@ -172,7 +172,7 @@ def process_web_request(cs, webroot, addr_cliente):
                 
                 enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
 
-            recurso = "/index.html"
+            recurso = text
                 
             if(recurso.find("..") > -1):
                 enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
