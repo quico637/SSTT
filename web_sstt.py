@@ -110,7 +110,7 @@ def process_cookies(headers):
 
     if(val < MAX_ACCESOS): 
         return val+1
-        
+
     return MAX_ACCESOS     
 
 def enviar_error(addr_cliente, ruta, msg, motivo, cs):
@@ -126,7 +126,7 @@ def enviar_error(addr_cliente, ruta, msg, motivo, cs):
     sys.exit(-1)  
 
 
-def process_web_request(cs, webroot, addr_cliente):
+def process_web_request(cs, webroot, addr_cliente):    
     try:
         while(True):
             rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
