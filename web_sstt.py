@@ -25,7 +25,7 @@ import logging
 
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
-TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
+TIMEOUT_CONNECTION = 50 # Timout para la conexión persistente
 MAX_ACCESOS = 10
 COOKIE_TIMER = 10
 
@@ -220,7 +220,7 @@ def process_web_request(cs, webroot, addr_cliente):
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
 
             else:
-                enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
+                enviar_error(addr_cliente, "./erros/400.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
         
     '''except Exception:
         print("\n\nHa ocurrido un error inesperado.", file=sys.stderr)
