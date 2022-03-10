@@ -75,37 +75,8 @@ def recibir_mensaje(cs):
 
 def enviar_recurso(ruta, tam, cabecera, cs):
 
-    print("ha entrado en enviar_recurso()")
-    imagen = False
-    '''if(ruta.find("gif") > -1 or ruta.find("jpg") > -1 or ruta.find("jpeg") > -1 or ruta.find("png") > -1 or ruta.find("ico") > -1):
-        imagen = True
-    if(imagen):
-        if(tam + len(cabecera) > BUFSIZE):
-            print("ha entrado en enviar_recurso() - imagen")
-            enviar_mensaje(cs, cabecera.encode())
-            print("ruta" + str(ruta))
-            with open(ruta, "rb") as f:
-                while (1):
-                    buffer = f.read(BUFSIZE)
-                    if(not buffer):
-                        break
-                    #enviar_mensaje(cs, buffer)
-                    cs.send(buffer)
-
-        else:
-            print("ha entrado en enviar_recurso() - imagen peq")
-            with open(ruta, "rb") as f:
-                buffer = f.read()
-                to_send = cabecera.encode() + buffer
-                #enviar_mensaje(cs, to_send)
-                cs.send(to_send)
-                
-    else:'''
-        
     if (tam + len(cabecera) <= BUFSIZE):
         # Enviar normal
-        print("ha entrado en enviar_recurso() - normal")
-
         with open(ruta, "rb") as f:
             buffer = f.read()
             to_send = cabecera.encode() + buffer
@@ -113,12 +84,10 @@ def enviar_recurso(ruta, tam, cabecera, cs):
             #cs.send(to_send)        
     else:
         # Enviar un mensaje con la cabecera y despuoes ir leyendo BUFSIZE bytes y escribiendolos en el socket.
-        print("ha entrado en enviar_recurso() - largo")
         enviar_mensaje(cs, cabecera.encode())
         with open(ruta, "rb") as f:
             while (1):
                 buffer = f.read(BUFSIZE)
-                #cs.send(buffer)
                 if(not buffer):
                     break
                 enviar_mensaje(cs, buffer)
@@ -170,13 +139,14 @@ def process_cookies(headers):
     return MAX_ACCESOS     
 
 def enviar_error(addr_cliente, ruta, msg, motivo, cs):
-    print("Socket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + str(cs.getsockname()))
-    print("Motivo:" + motivo)
+    print("\n\nSocket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + str(cs.getsockname()))
+    print("Motivo: " + motivo)
     ftype = os.path.basename(ruta).split(".")
     ftype = ftype[len(ftype)-1]
     respuesta = msg + "\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(ruta).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
     enviar_recurso(ruta,  os.stat(ruta).st_size, respuesta, cs)
 
+    print("Se procede a enviar la pagina web de error...")
     cerrar_conexion(cs)
     sys.exit(-1)  
 
@@ -224,7 +194,7 @@ def process_web_request(cs, webroot, addr_cliente):
     while(True):
         rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
         if(not rsublist):     # en el caso que el select falle
-            print("Ha saltado el Timeout.")
+            print("\n\nHa saltado el Timeout.")
             cerrar_conexion(cs)
             sys.exit(-1)
             
@@ -242,7 +212,7 @@ def process_web_request(cs, webroot, addr_cliente):
         text = ""
         headers = []
         res = er_get.fullmatch(splitted[0])
-        print("PETICION RECIBIDA: ")
+        print("\n\nPETICION RECIBIDA: ")
         if(res):
             text = res.group(2)
             for i in splitted:
@@ -253,7 +223,7 @@ def process_web_request(cs, webroot, addr_cliente):
                     continue
                 result = er_cabeceras.fullmatch(i)
                 if(not result):
-                    print("ERROR CABECERAS.")
+                    print("\n\nERROR CABECERAS.")
                     cerrar_conexion(cs)
                     sys.exit(-1)
                             
@@ -262,30 +232,11 @@ def process_web_request(cs, webroot, addr_cliente):
             accesos = process_cookies(headers)
             if (accesos >= MAX_ACCESOS):
                 enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
-                er = "./errors/403.html"
-                respuesta =  "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: text/html" + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                print("Socket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + cs.getsockname())
-                print("Motivo: Maximo de accesos. Error 403 Forbidden")
-                cerrar_conexion(cs)
-                sys.exit(-1)
-
 
             recurso = "/index.html"
                   
             if(recurso.find("..") > -1):
                 enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
-                '''print("Socket cerrado. Cliente: IP - " + str(addr_cliente) + "PUERTO - " + cs.getsockname())
-                print("Motivo: Maximo de accesos. Error 403 Forbidden")
-                er = "./errors/seguridad.html"
-                ftype = os.path.basename(er).split(".")
-                ftype = ftype[len(ftype)-1]
-                respuesta ="HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: "+ filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)'''
-                
-
-                cerrar_conexion(cs)
-                sys.exit(-1)
 
             # Quitamos los parametros de la URL si los hubiera
             recurso = text.split(sep='?', maxsplit=1)[0]
@@ -298,28 +249,11 @@ def process_web_request(cs, webroot, addr_cliente):
             file_type = file_type[len(file_type)-1]
             if(not os.path.isfile(r_solicitado)):
                 enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
-                err = "./errors/404.html"
-                file_type = os.path.basename(err).split(".")
-                file_type = file_type[len(file_type)-1]
-                respuesta = "HTTP/1.1 404 Method Not Allowed\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                #break
-                cerrar_conexion(cs)
-                sys.exit(-1)
 
 
             if(file_type not in filetypes):
                 enviar_error(addr_cliente, "./errors/415.html", "HTTP/1.1 415 Unsopported Media Type" , "Tipo de archivo no permitido.", cs)
-                err = "./errors/415.html"
-                file_type = os.path.basename(err).split(".")
-                file_type = file_type[len(file_type)-1]
-                respuesta = "HTTP/1.1 415 Unsopported Media Type\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(err).st_size) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(err, os.stat(err).st_size, respuesta, cs)
-                #break
-                cerrar_conexion(cs)
-                sys.exit(-1)
 
-            #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
             respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
             print("RESPUESTA:")
             print(respuesta)
@@ -329,15 +263,6 @@ def process_web_request(cs, webroot, addr_cliente):
             sol = splitted[0].split(sep=" ", maxsplit=-1)
             if(sol[0] != "GET" and sol[0] != "POST"):
                 enviar_error(addr_cliente, "./errors/405.html",  "HTTP/1.1 405 Method not allowed" , "Metodo no soportado.", cs)
-                print("Error 405: Method not allowed.")
-                er = "./errors/405.html"
-                ftype = os.path.basename(er).split(".")
-                ftype = ftype[len(ftype)-1]
-                respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                #break
-                cerrar_conexion(cs)
-                sys.exit(-1)
             elif (sol[0] == "POST"):
                 #Hacer tratamiento con POST
                 found = False
@@ -352,14 +277,6 @@ def process_web_request(cs, webroot, addr_cliente):
                 if(not found):
                     #print("No se ha encontrado e-mail - 403 Forbidden")
                     enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 403 Forbidden" , "No se ha enviado el formulario correctamente.", cs)
-                    er = "./post/error.html"
-                    ftype = os.path.basename(er).split(".")
-                    ftype = ftype[len(ftype)-1]
-                    respuesta = "HTTP/1.1 403 Forbidden\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                    #break
-                    cerrar_conexion(cs)
-                    sys.exit(-1)
                 
                 respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
@@ -367,14 +284,6 @@ def process_web_request(cs, webroot, addr_cliente):
             else:
                 #print("No se ha seguido el protocolo HTTP 1.1 - 400 Bad Request")
                 enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
-                er = "./post/error.html"
-                ftype = os.path.basename(er).split(".")
-                ftype = ftype[len(ftype)-1]
-                respuesta = "HTTP/1.1 400 Bad Request\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: " + str(os.stat(er).st_size) + "\r\n" + "Content-Type: " + filetypes[ftype] + "\r\nConnection: close\r\n\r\n"
-                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-                #break
-                cerrar_conexion(cs)
-                sys.exit(-1)
           
 
     '''except Exception:
