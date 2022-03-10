@@ -128,106 +128,106 @@ def enviar_error(addr_cliente, ruta, msg, motivo, cs):
 
 
 def process_web_request(cs, webroot, addr_cliente):    
-    try:
-        while(True):
-            rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
-            if(not rsublist):     # en el caso que el select falle
-                print("\n\nHa saltado el Timeout.", file=sys.stderr)
-                cerrar_conexion(cs)
-                sys.exit(-1)
-                
-
-            data = recibir_mensaje(cs)
-
-            if(not data):   
-                cerrar_conexion(cs)
-                sys.exit(-1)
-        
-            respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
-            splitted = data.split(sep="\r\n", maxsplit=-1)
-
-            text = ""
-            headers = []
-            res = er_get.fullmatch(splitted[0])
-            print("Cliente: " + str(addr_cliente))
-            print("\n\nPETICION RECIBIDA: ")
-            if(res):
-                text = res.group(2)
-                for i in splitted:
-                    if (not i):     #i == ""
-                        continue
-                    print(i)
-                    if(i.find("GET") > -1):
-                        continue
-                    result = er_cabeceras.fullmatch(i)
-                    if(not result):
-                        print("\n\nERROR CABECERAS.", file=sys.stderr)
-                        cerrar_conexion(cs)
-                        sys.exit(-1)
-                                
-                    headers.append(i)
-                
-                accesos = process_cookies(headers)
-                if (accesos >= MAX_ACCESOS):
-                    
-                    enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
-
-                recurso = "/index.html"
-                    
-                if(recurso.find("..") > -1):
-                    enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
-
-                # Quitamos los parametros de la URL si los hubiera
-                recurso = text.split(sep='?', maxsplit=1)[0]
-
-                if(recurso == '/'): recurso = "/index.html"
-
-                r_solicitado = webroot + recurso
-
-                file_type = os.path.basename(r_solicitado).split(".")
-                file_type = file_type[len(file_type)-1]
-                if(not os.path.isfile(r_solicitado)):
-                    enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
-
-
-                if(file_type not in filetypes):
-                    enviar_error(addr_cliente, "./errors/415.html", "HTTP/1.1 415 Unsopported Media Type" , "Tipo de archivo no permitido.", cs)
-
-                respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
-                print("\n\nRESPUESTA:")
-                print(respuesta)
-                enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
-                    
-            else:
-                sol = splitted[0].split(sep=" ", maxsplit=-1)
-                if(sol[0] != "GET" and sol[0] != "POST"):
-                    enviar_error(addr_cliente, "./errors/405.html",  "HTTP/1.1 405 Method not allowed" , "Metodo no soportado.", cs)
-                elif (sol[0] == "POST"):
-                    #Hacer tratamiento con POST
-                    found = False
-                    er = ""
-                    for i in splitted:
-                        if(i.find("email=") > -1):
-                            found = True
-                            if(i.split(sep="%40")[1] == "um.es"):
-                                er = "./post/verificado.html"
-
-                    
-                    if(not found):
-                        enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 403 Forbidden" , "No se ha enviado el formulario correctamente.", cs)
-                    
-                    respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
-                    enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
-
-                else:
-                    enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
+    #try:
+    while(True):
+        rsublist, wsublist, xsublist = select.select([cs], [], [], TIMEOUT_CONNECTION)
+        if(not rsublist):     # en el caso que el select falle
+            print("\n\nHa saltado el Timeout.", file=sys.stderr)
+            cerrar_conexion(cs)
+            sys.exit(-1)
             
-    except Exception:
+
+        data = recibir_mensaje(cs)
+
+        if(not data):   
+            cerrar_conexion(cs)
+            sys.exit(-1)
+    
+        respuesta = "HTTP/1.1 200 OK\r\nDate: " + str(datetime.today()) + "\r\nServer: Chapuza SSTT\r\nContent-Length: "
+        splitted = data.split(sep="\r\n", maxsplit=-1)
+
+        text = ""
+        headers = []
+        res = er_get.fullmatch(splitted[0])
+        print("Cliente: " + str(addr_cliente))
+        print("\n\nPETICION RECIBIDA: ")
+        if(res):
+            text = res.group(2)
+            for i in splitted:
+                if (not i):     #i == ""
+                    continue
+                print(i)
+                if(i.find("GET") > -1):
+                    continue
+                result = er_cabeceras.fullmatch(i)
+                if(not result):
+                    print("\n\nERROR CABECERAS.", file=sys.stderr)
+                    cerrar_conexion(cs)
+                    sys.exit(-1)
+                            
+                headers.append(i)
+            
+            accesos = process_cookies(headers)
+            if (accesos >= MAX_ACCESOS):
+                
+                enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
+
+            recurso = "/index.html"
+                
+            if(recurso.find("..") > -1):
+                enviar_error(addr_cliente, "./errors/seguridad.html", "HTTP/1.1 403 Forbidden", "Fallo en la seguridad del programa.", cs)
+
+            # Quitamos los parametros de la URL si los hubiera
+            recurso = text.split(sep='?', maxsplit=1)[0]
+
+            if(recurso == '/'): recurso = "/index.html"
+
+            r_solicitado = webroot + recurso
+
+            file_type = os.path.basename(r_solicitado).split(".")
+            file_type = file_type[len(file_type)-1]
+            if(not os.path.isfile(r_solicitado)):
+                enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
+
+
+            if(file_type not in filetypes):
+                enviar_error(addr_cliente, "./errors/415.html", "HTTP/1.1 415 Unsopported Media Type" , "Tipo de archivo no permitido.", cs)
+
+            respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+            print("\n\nRESPUESTA:")
+            print(respuesta)
+            enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
+                
+        else:
+            sol = splitted[0].split(sep=" ", maxsplit=-1)
+            if(sol[0] != "GET" and sol[0] != "POST"):
+                enviar_error(addr_cliente, "./errors/405.html",  "HTTP/1.1 405 Method not allowed" , "Metodo no soportado.", cs)
+            elif (sol[0] == "POST"):
+                #Hacer tratamiento con POST
+                found = False
+                er = ""
+                for i in splitted:
+                    if(i.find("email=") > -1):
+                        found = True
+                        if(i.split(sep="%40")[1] == "um.es"):
+                            er = "./post/verificado.html"
+
+                
+                if(not found):
+                    enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 403 Forbidden" , "No se ha enviado el formulario correctamente.", cs)
+                
+                respuesta = respuesta + str(os.stat(er).st_size) + "\r\n" + "Keep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+                enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
+
+            else:
+                enviar_error(addr_cliente, "./post/error.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
+        
+    '''except Exception:
         print("\n\nHa ocurrido un error inesperado.", file=sys.stderr)
 
         cerrar_conexion(cs)
         sys.exit(-1)
-
+'''
 
 def main():
     try:
