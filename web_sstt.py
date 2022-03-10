@@ -253,7 +253,7 @@ def process_web_request(cs, webroot, addr_cliente):
                     continue
                 result = er_cabeceras.fullmatch(i)
                 if(not result):
-                    print("ERROR CABECERAS")
+                    print("ERROR CABECERAS.")
                     cerrar_conexion(cs)
                     sys.exit(-1)
                             
@@ -296,7 +296,6 @@ def process_web_request(cs, webroot, addr_cliente):
 
             file_type = os.path.basename(r_solicitado).split(".")
             file_type = file_type[len(file_type)-1]
-            print("filetype: " + file_type)
             if(not os.path.isfile(r_solicitado)):
                 enviar_error(addr_cliente, "./errors/404.html", "HTTP/1.1 404 Method Not Allowed", "Recurso no existe en el servidor.", cs)
                 err = "./errors/404.html"
@@ -322,9 +321,9 @@ def process_web_request(cs, webroot, addr_cliente):
 
             #"Set-cookie: cookie_counter=" + str(accesos) + "\r\n"
             respuesta = respuesta + str(os.stat(r_solicitado).st_size) + "\r\n"+ "Set-cookie: cookie_counter=" + str(accesos)+ "; Max-Age= "+ str(COOKIE_TIMER) + "\r\n" + "Content-Type: " + filetypes[file_type] + "\r\nKeep-Alive: timeout=" + str(TIMEOUT_CONNECTION+1) + ", max= " + str(MAX_ACCESOS) + "\r\nConnection: Keep-Alive\r\n\r\n"
+            print("RESPUESTA:")
             print(respuesta)
             enviar_recurso(r_solicitado, os.stat(r_solicitado).st_size, respuesta, cs)
-            print("HE LLEGAO AL FINAL")
                 
         else:
             sol = splitted[0].split(sep=" ", maxsplit=-1)
