@@ -106,6 +106,7 @@ def process_cookies(headers):
     
     
     if(not cookie): 
+        print("\n\nEstableciendo cookie...")
         return 1
 
     if(val < MAX_ACCESOS): 
@@ -168,6 +169,7 @@ def process_web_request(cs, webroot, addr_cliente):
                 
                 accesos = process_cookies(headers)
                 if (accesos >= MAX_ACCESOS):
+                    
                     enviar_error(addr_cliente, "./errors/403.html", "HTTP/1.1 403 Forbidden", "Maximo de accesos", cs)
 
                 recurso = "/index.html"
