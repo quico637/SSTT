@@ -220,7 +220,7 @@ def process_web_request(cs, webroot, addr_cliente):
                 enviar_recurso(er,  os.stat(er).st_size, respuesta, cs)
 
             elif(sol[2].find("HTTP/") > -1 and sol[0] == "GET"):
-                enviar_error(addr_cliente, "./post/505.html", "HTTP/1.1 505 Version Not Supported" , "Version de HTTP no soportada.", cs)    
+                enviar_error(addr_cliente, "./errors/505.html", "HTTP/1.1 505 Version Not Supported" , "Version de HTTP no soportada.", cs)    
 
             else:
                 enviar_error(addr_cliente, "./errors/400.html", "HTTP/1.1 400 Bad Request" , "No se ha seguido el protocolo HTTP/1.1 .", cs)
